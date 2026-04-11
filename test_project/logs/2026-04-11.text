@@ -1,0 +1,4 @@
+2026-04-11_08:15:22 || db.py || 4 || 502 Bad Gateway: Upstream server timed out
+2026-04-11_09:00:01 || main.py || 5 || INFO: Restarting after crash
+2026-04-11_09:05:44 || db.py || 4 || 500 Internal Server Error: Null pointer at DBConnector.java:88
+2026-04-11_10:10:10 || main.py || 12 || ERROR: Persistent 5XX errors detected in downstream services
