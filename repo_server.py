@@ -1,181 +1,207 @@
-from fastmcp import FastMCP
-from pathlib import Path
+"""
+repo_server.py (Optimized for Small LLMs)
+"""
+
 import os
+from pathlib import Path
+from fastmcp import FastMCP
 
 mcp = FastMCP("Repository_Expert")
 
-@mcp.tool()
-def list_directory(path: str = ".") -> str:
-    """
-    ACTION: Scans a directory and lists all sub-folders and files.
-    
-    INTENT: Use this tool to map out the repository structure or locate a specific file 
-    before attempting to read it. It provides the 'map' for your exploration.
-    
-    INPUT: 
-        path (str): The relative path to the directory (e.g., 'src/'). Use '.' for root.
-        
-    OUTPUT: 
-        A list of items prefixed with 'DIRECTORY:' or 'FILE:'. 
-        If an error occurs, the response will start with 'ERROR:'.
-    """
+# ── Security ──────────────────────────────────────────────────────────────────
+_PROJECT_ROOT = Path(os.getcwd()).resolve()
+
+_IGNORE = frozenset({
+    ".git", "__pycache__", ".venv", "venv", ".env",
+    "node_modules", ".pytest_cache", ".mypy_cache", "dist", "build",
+})
+
+_MAX_FILE_BYTES   = 1_000_000   # 1 MB — protects context window on read_file
+_MAX_SEARCH_BYTES =   500_000   # 0.5 MB — per-file limit during repo-wide search
+_MAX_SEARCH_HITS  =        50   # result cap for search_text_in_repository
+
+
+def _is_safe(path: Path) -> bool:
+    """Return True only if the resolved path stays inside the project root."""
     try:
-        target_path = Path(path).resolve()
-        
-        # Security: Keep the LLM within the project bounds
-        if not str(target_path).startswith(os.getcwd()):
-            return "ERROR: Permission Denied. You cannot access directories outside the project root."
+        path.resolve().relative_to(_PROJECT_ROOT)
+        return True
+    except ValueError:
+        return False
 
-        if not target_path.exists():
-            return f"ERROR: Path '{path}' does not exist. Use '.' to see the root directory."
-        
-        if not target_path.is_dir():
-            return f"ERROR: '{path}' is a file. Use 'read_file' to view its contents."
 
-        entries = []
-        for entry in target_path.iterdir():
-            label = "DIRECTORY:" if entry.is_dir() else "FILE:     "
-            entries.append(f"{label} {entry.name}")
-        
-        if not entries:
-            return f"INFO: The directory '{path}' is currently empty."
+# ─────────────────────────────────────────────────────────────────────────────
+# TOOL 1 — REPOSITORY MAP
+# ─────────────────────────────────────────────────────────────────────────────
 
-        # Adding a summary count helps the LLM understand the scale of the folder
-        summary = f"Found {len(entries)} items in '{path}':\n"
-        return summary + "\n".join(sorted(entries))
+@mcp.tool()
+def get_repository_structure(max_depth: int = 5) -> str:
+    """
+    Get the full file tree.
+    
+    USAGE:
+    MANDATORY STEP 1. Call this once at the start of every session. 
+    Use the returned paths VERBATIM in other tools. Never guess paths.
+    
+    Args:
+        max_depth: How deep to scan. Default 5.
+    """
+    tree_lines = [f"📁 {_PROJECT_ROOT.name}/"]
 
-    except Exception as e:
-        return f"ERROR: System failed to list directory: {str(e)}"
+    def _walk(current: Path, prefix: str, depth: int) -> None:
+        if depth > max_depth:
+            return
+        try:
+            entries = sorted(
+                [e for e in current.iterdir() if e.name not in _IGNORE],
+                key=lambda e: (e.is_file(), e.name.lower()),  # dirs first
+            )
+        except PermissionError:
+            tree_lines.append(f"{prefix}└── [Permission Denied]")
+            return
+
+        for idx, entry in enumerate(entries):
+            is_last  = idx == len(entries) - 1
+            connector = "└── " if is_last else "├── "
+            icon      = "📁 " if entry.is_dir() else "📄 "
+            tree_lines.append(f"{prefix}{connector}{icon}{entry.name}")
+            if entry.is_dir():
+                _walk(entry, prefix + ("    " if is_last else "│   "), depth + 1)
+
+    _walk(_PROJECT_ROOT, "", 1)
+    return "\n".join(tree_lines)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# TOOL 2 — FILE READER
+# ─────────────────────────────────────────────────────────────────────────────
 
 @mcp.tool()
 def read_file(path: str) -> str:
     """
-    ACTION: Retrieves the text-based content of a specific file.
+    Read full text and line numbers of a file.
     
-    INTENT: Use this tool to examine the source code, logic, or data within a file 
-    once you have identified its path using 'list_directory'.
+    USAGE:
+    Call this after logs identify a suspicious file. 
+    ONLY use paths found in get_repository_structure.
     
-    INPUT: 
-        path (str): The exact path to the file (e.g., 'src/main.py').
-        
-    OUTPUT: 
-        The raw text of the file. If the file is binary or too large, an error is returned.
+    Args:
+        path: Relative path (e.g., 'src/api/endpoints.py').
     """
+    target = Path(path)
+    resolved = (_PROJECT_ROOT / target).resolve() if not target.is_absolute() else target.resolve()
+
+    if not _is_safe(resolved):
+        return "ERROR: Access denied — path is outside the project root."
+
+    if not resolved.exists():
+        return (
+            f"ERROR: '{path}' does not exist.\n"
+            "Check the spelling against get_repository_structure output."
+        )
+
+    if not resolved.is_file():
+        return (
+            f"ERROR: '{path}' is a directory, not a file.\n"
+            "Use get_repository_structure to browse directories."
+        )
+
+    if resolved.stat().st_size > _MAX_FILE_BYTES:
+        size_mb = resolved.stat().st_size / 1_000_000
+        return (
+            f"ERROR: '{path}' is {size_mb:.1f} MB — too large to read safely.\n"
+            "Use search_text_in_repository to locate the specific lines you need."
+        )
+
     try:
-        target_path = Path(path).resolve()
-
-        if not str(target_path).startswith(os.getcwd()):
-            return "ERROR: Permission Denied. Access restricted to project files."
-
-        if not target_path.exists():
-            return f"ERROR: File '{path}' not found. Did you check the spelling with 'list_directory'?"
-        
-        if not target_path.is_file():
-            return f"ERROR: '{path}' is a directory. Use 'list_directory' instead."
-
-        # 1MB limit check to protect the LLM's context window
-        if target_path.stat().st_size > 1_000_000:
-            return "ERROR: File is too large (>1MB). Reading this would exceed your memory limits."
-
-        content = target_path.read_text(encoding='utf-8', errors='replace')
-        
-        # Using clear delimiters helps the LLM distinguish file content from its own reasoning
-        return f"--- START OF FILE: {path} ---\n{content}\n--- END OF FILE: {path} ---"
-
+        raw = resolved.read_text(encoding="utf-8", errors="replace")
     except UnicodeDecodeError:
-        return f"ERROR: '{path}' appears to be a binary file (like an image or executable) and cannot be read as text."
-    except Exception as e:
-        return f"ERROR: System could not read file: {str(e)}"
+        return f"ERROR: '{path}' is a binary file and cannot be read as text."
+    except OSError as exc:
+        return f"ERROR: Could not read '{path}' — {exc}"
+
+    # Numbered lines make it trivial to cite code evidence in the final report
+    numbered = "\n".join(
+        f"{lineno:>4} | {line}"
+        for lineno, line in enumerate(raw.splitlines(), 1)
+    )
+    return (
+        f"--- START OF FILE: {path} ({raw.count(chr(10)) + 1} lines) ---\n"
+        f"{numbered}\n"
+        f"--- END OF FILE: {path} ---"
+    )
 
 
-@mcp.tool()
-def find_files_by_name(pattern: str) -> str:
-    """
-    ACTION: Searches for files that match a specific name or pattern.
-    
-    INTENT: Use this when you know the name of a file (or part of it) but don't know 
-    which directory it's in. It performs a recursive search.
-    
-    INPUT: 
-        pattern (str): The filename or glob pattern to search for (e.g., 'config.json' or '*.py').
-        
-    OUTPUT: 
-        A list of relative paths to matching files.
-    """
-    try:
-        root = Path(os.getcwd())
-        # Use rglob for recursive searching
-        matches = list(root.rglob(pattern))
-        
-        # Filter to ensure we only return files, not directories
-        file_matches = [m.relative_to(root) for m in matches if m.is_file()]
-
-        if not file_matches:
-            return f"INFO: No files matching '{pattern}' were found in the repository."
-
-        result = f"Found {len(file_matches)} match(es) for '{pattern}':\n"
-        return result + "\n".join([f"PATH: {path}" for path in file_matches])
-
-    except Exception as e:
-        return f"ERROR: Search failed due to system error: {str(e)}"
+# ─────────────────────────────────────────────────────────────────────────────
+# TOOL 3 — CODE SEARCH
+# ─────────────────────────────────────────────────────────────────────────────
 
 @mcp.tool()
 def search_text_in_repository(query: str) -> str:
     """
-    ACTION: Searches for a specific string/text inside all files in the repository.
+    Search codebase for a specific string.
     
-    INTENT: Use this to find where a specific function is defined, where a variable is used, 
-    or to find specific keywords across the entire codebase.
+    USAGE:
+    1. Find where a function is defined (e.g., 'def process_data').
+    2. Follow imports when an error happens in a library file.
+    3. Find all places an exception is raised (e.g., 'ValueError').
     
-    INPUT: 
-        query (str): The text string to search for.
-        
-    OUTPUT: 
-        A list of files containing the text, including the line number where it was found.
+    Args:
+        query: Case-sensitive string to find.
     """
-    try:
-        root = Path(os.getcwd())
-        results = []
-        
-        # Walk through all files
-        for file_path in root.rglob('*'):
-            # Security & File Type Checks
-            if not file_path.is_file() or file_path.name.startswith('.'):
-                continue
-                
-            try:
-                # Check file size before reading to stay efficient
-                if file_path.stat().st_size > 500_000: # 0.5MB limit for search
-                    continue
+    results: list[str] = []
 
-                content = file_path.read_text(encoding='utf-8', errors='ignore')
-                
-                if query in content:
-                    # Find line numbers
-                    lines = content.splitlines()
-                    for i, line in enumerate(lines):
-                        if query in line:
-                            rel_path = file_path.relative_to(root)
-                            # Truncate line if it's too long
-                            clean_line = line.strip()[:100]
-                            results.append(f"FILE: {rel_path} | LINE {i+1}: {clean_line}")
-                            
-            except (UnicodeDecodeError, PermissionError):
-                continue # Skip binary or locked files
+    for file_path in sorted(_PROJECT_ROOT.rglob("*")):
+        if not file_path.is_file():
+            continue
+        if any(part in _IGNORE for part in file_path.parts):
+            continue
+        if file_path.name.startswith("."):
+            continue
+        if file_path.stat().st_size > _MAX_SEARCH_BYTES:
+            continue
 
-        if not results:
-            return f"INFO: The string '{query}' was not found in any readable text files."
+        try:
+            content = file_path.read_text(encoding="utf-8", errors="ignore")
+        except (OSError, PermissionError):
+            continue
 
-        # Limit results to 50 to prevent context window overflow
-        final_list = results[:50]
-        header = f"Found matches for '{query}' in the following locations:\n"
-        footer = "\n(Truncated to first 50 matches)" if len(results) > 50 else ""
-        
-        return header + "\n".join(final_list) + footer
+        if query not in content:
+            continue
 
-    except Exception as e:
-        return f"ERROR: Global text search failed: {str(e)}"
+        rel = file_path.relative_to(_PROJECT_ROOT)
+        for lineno, line in enumerate(content.splitlines(), 1):
+            if query in line:
+                snippet = line.strip()[:120]
+                results.append(f"FILE: {rel} | LINE {lineno}: {snippet}")
+            if len(results) >= _MAX_SEARCH_HITS:
+                break
 
+        if len(results) >= _MAX_SEARCH_HITS:
+            break
+
+    if not results:
+        return (
+            f"INFO: '{query}' not found in any readable file under {_PROJECT_ROOT.name}/.\n"
+            "Verify the exact string — this search is case-sensitive."
+        )
+
+    cap_note = (
+        f"\nNOTE: Results capped at {_MAX_SEARCH_HITS}. "
+        "Use a more specific query to narrow results."
+        if len(results) == _MAX_SEARCH_HITS
+        else ""
+    )
+    return (
+        f"Found {len(results)} match(es) for '{query}':\n"
+        + "\n".join(results)
+        + cap_note
+    )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ENTRY POINT
+# ─────────────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     mcp.run(transport="sse", port=8000)
