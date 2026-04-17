@@ -9,115 +9,72 @@ mcp = FastMCP("Log_Investigator")
 
 LOG_DIR = Path("./logs").resolve()
 LOG_DIR.mkdir(exist_ok=True)
-_MAX_RESULTS = 200
+_MAX_LIFECYCLE_RESULTS = 100 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # TOOL 1 — PRIMARY SCAN
 # ─────────────────────────────────────────────────────────────────────────────
 
 @mcp.tool()
-def search_logs_content(query: str, date_pattern: str = "*") -> str:
+def search_log(query: str, date_pattern: str = "*") -> str:
     """
-    Search log files for text. 
+    Search logs. 
+    LITERAL EXAMPLES: query='k7l8m9n0' (ID search), query='10:00:00' (Time).
     
-    USAGE:
-    1. Initial Scan: query='500' to find HTTP errors.
-    2. Chain Discovery (MANDATORY): Once you find a 500 error, call this again 
-       with the EXACT TIMESTAMP (e.g., '17:58:33') to see the lines before it.
-    
-    Args:
-        query: Search string (e.g., '500', 'ValueError', or '17:58:33').
-        date_pattern: Date filter (e.g., '2026-04-11'). Use '*' for all.
+    CRITICAL FOR SMALL MODELS:
+    1. Search the Request ID (e.g. 'k7l8m9n0') FIRST to trace the full chain.
+    2. Do NOT use '5XX'; search exact strings like 'HTTP 500' or 'ERROR'.
+    3. Once a log shows a file and line (e.g. 'main.py | L83'), STOP and use read_file.
     """
     log_files = sorted(LOG_DIR.glob(f"{date_pattern}.text"))
     if not log_files:
         return f"ERROR: No log files found for '{date_pattern}'"
 
     results: list[str] = []
-    needle = query.lower()
+    # Small models are more reliable with case-insensitive search
+    needle_bytes = query.lower().encode("utf-8")
 
     for log_file in log_files:
         try:
-            with open(log_file, "r", encoding="utf-8") as fh:
+            first_offset = None
+            last_offset = None
+            first_line_num = 0
+            
+            # --- PASS 1: Binary scan for byte offsets ---
+            with open(log_file, "rb") as fh:
+                current_pos = 0
                 for line_num, line in enumerate(fh, 1):
-                    if needle in line.lower():
-                        results.append(f"[{log_file.name}] L{line_num}: {line.rstrip()}")
-                    if len(results) >= _MAX_RESULTS:
-                        break
+                    # 'line' is bytes, so we compare it against 'needle_bytes'
+                    if needle_bytes in line.lower():
+                        if first_offset is None:
+                            first_offset = current_pos
+                            first_line_num = line_num
+                        last_offset = fh.tell()
+                    current_pos = fh.tell()
+
+            # --- PASS 2: Surgical Binary Extraction ---
+            if first_offset is not None and last_offset is not None:
+                # We stay in "rb" mode here to ensure 'read(n)' matches our byte math
+                with open(log_file, "rb") as fh:
+                    fh.seek(first_offset)
+                    content_bytes = fh.read(last_offset - first_offset)
+                    # Now decode the chunk into a string for the LLM
+                    content = content_bytes.decode("utf-8", errors="ignore")
+                    
+                    for i, line in enumerate(content.splitlines()):
+                        results.append(f"[{log_file.name}] L{first_line_num + i}: {line.rstrip()}")
+                        
+                        if len(results) >= _MAX_LIFECYCLE_RESULTS:
+                            results.append("... [TRUNCATED] ...")
+                            break
+                            
         except OSError as exc:
             results.append(f"[{log_file.name}] ERROR: {exc}")
-        if len(results) >= _MAX_RESULTS:
-            results.append("WARNING: Result cap reached. Narrow your query.")
+
+        if len(results) >= _MAX_LIFECYCLE_RESULTS:
             break
 
-    return "\n".join(results) if results else f"No matches for '{query}'"
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# TOOL 2 — SOURCE-FILE TRACE
-# ─────────────────────────────────────────────────────────────────────────────
-
-@mcp.tool()
-def grep_logs_by_file(target_filename: str, date: str) -> str:
-    """
-    Get all log activity for one source file on a specific date.
-    Use this to trace logic flow in a specific file like 'endpoints.py'.
-    
-    Args:
-        target_filename: Source file name (e.g., 'data_processor.py').
-        date: Date in 'YYYY-MM-DD' format.
-    """
-    file_path = LOG_DIR / f"{date}.text"
-    if not file_path.exists():
-        return f"ERROR: No log for {date}"
-
-    matches: list[str] = []
-    try:
-        with open(file_path, "r", encoding="utf-8") as fh:
-            for line in fh:
-                if f"|| {target_filename} ||" in line:
-                    matches.append(line.rstrip())
-    except OSError as exc:
-        return f"ERROR: {exc}"
-
-    return "\n".join(matches) if matches else f"No logs for {target_filename} on {date}"
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# TOOL 3 — TIME RANGE ANCHOR
-# ─────────────────────────────────────────────────────────────────────────────
-
-@mcp.tool()
-def get_log_timerange(date: str) -> str:
-    """
-    Check log coverage: Returns first/last timestamps and 5XX error counts.
-    Call this BEFORE searching to confirm the log covers the time you need.
-    
-    Args:
-        date: Date in 'YYYY-MM-DD' format.
-    """
-    file_path = LOG_DIR / f"{date}.text"
-    if not file_path.exists():
-        return f"ERROR: No log for {date}"
-
-    first_ts, last_ts = None, None
-    total_lines, error_count = 0, 0
-
-    try:
-        with open(file_path, "r", encoding="utf-8") as fh:
-            for line in fh:
-                line = line.strip()
-                if not line: continue
-                total_lines += 1
-                ts = line.split("||")[0].strip()
-                if not first_ts: first_ts = ts
-                last_ts = ts
-                if "HTTP 5" in line: error_count += 1
-    except Exception as exc:
-        return f"ERROR: {exc}"
-
-    return (f"Log: {date}.text\nStart: {first_ts}\nEnd: {last_ts}\n"
-            f"Total Lines: {total_lines}\n5XX Errors: {error_count}")
+    return "\n".join(results) if results else f"No logs found matching: '{query}'"
 
 
 if __name__ == "__main__":

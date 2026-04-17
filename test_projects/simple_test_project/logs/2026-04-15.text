@@ -1,0 +1,79 @@
+2026-04-15_07:00:00 | INFO    | main.py               | L62  | PulseMetrics starting up — initialising infrastructure.
+2026-04-15_07:00:00 | INFO    | db.py                 | L43  | [db] Connecting — pool_size=5.
+2026-04-15_07:00:01 | INFO    | db.py                 | L45  | [db] Connection pool ready.
+2026-04-15_07:00:01 | INFO    | cache.py              | L30  | [cache] Connecting to Redis.
+2026-04-15_07:00:01 | INFO    | cache.py              | L32  | [cache] Redis connection established.
+2026-04-15_07:00:01 | INFO    | main.py               | L64  | Infrastructure ready. Accepting requests.
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-15_08:05:30 | DEBUG   | main.py               | L75  | [k7l8m9n0] Incoming GET /api/v2/query/summary/host-prod-03 from 10.0.5.21
+2026-04-15_08:05:30 | INFO    | query.py              | L35  | Summary query — source='host-prod-03' metric='net_rx_bytes' window=1800s.
+2026-04-15_08:05:30 | DEBUG   | query_service.py      | L45  | [query] Summary requested — source=host-prod-03 metric=net_rx_bytes window=1800s tenant=default.
+2026-04-15_08:05:30 | DEBUG   | query_service.py      | L51  | [query] Checking cache — key=summary:default:host-prod-03:net_rx_bytes:1800.
+2026-04-15_08:05:30 | DEBUG   | cache.py              | L34  | [cache] GET summary:default:host-prod-03:net_rx_bytes:1800.
+2026-04-15_08:05:30 | WARNING | cache.py              | L42  | [cache] Stampede detected on key=summary:default:host-prod-03:net_rx_bytes:1800. Waiting 1.5s for distributed lock.
+2026-04-15_08:05:31 | ERROR   | cache.py              | L46  | TimeoutError: Cache GET timed out after 1.5s waiting for lock on key='summary:default:host-prod-03:net_rx_bytes:1800'. Possible cache stampede — consider probabilistic early expiry.
+2026-04-15_08:05:31 | ERROR   | query_service.py      | L51  | [query] Cache read failed — key=summary:default:host-prod-03:net_rx_bytes:1800: Cache GET timed out.
+2026-04-15_08:05:31 | ERROR   | query.py              | L42  | Summary timed out — source='host-prod-03': Cache GET timed out after 1.5s.
+2026-04-15_08:05:31 | ERROR   | main.py               | L83  | [k7l8m9n0] GET /api/v2/query/summary/host-prod-03 → HTTP 503 in 1521.8ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-15_09:12:44 | DEBUG   | main.py               | L75  | [p1q2r3s4] Incoming POST /api/v2/ingest/event from 10.0.1.77
+2026-04-15_09:12:44 | INFO    | ingest.py             | L42  | [p1q2r3s4] Ingest request for metric='latency_p99' source='api-gateway'.
+2026-04-15_09:12:44 | DEBUG   | auth_service.py       | L48  | Validating token (length=0).
+2026-04-15_09:12:44 | WARNING | auth_service.py       | L57  | Malformed token: expected 3 parts, got 1.
+2026-04-15_09:12:44 | ERROR   | auth_service.py       | L58  | ValueError: Malformed token: expected 3 parts, got 1. Ensure the Authorization header is 'Bearer <token>'.
+2026-04-15_09:12:44 | WARNING | ingest.py             | L50  | [p1q2r3s4] Auth rejected for source='api-gateway': Malformed token: expected 3 parts, got 1.
+2026-04-15_09:12:44 | INFO    | main.py               | L83  | [p1q2r3s4] POST /api/v2/ingest/event → HTTP 401 in 2.8ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-15_10:00:00 | DEBUG   | main.py               | L75  | [t5u6v7w8] Incoming GET /api/v2/query/summary/sensor-404 from 10.0.3.55
+2026-04-15_10:00:00 | INFO    | query.py              | L35  | Summary query — source='sensor-404' metric='temperature' window=3600s.
+2026-04-15_10:00:00 | DEBUG   | query_service.py      | L45  | [query] Summary requested — source=sensor-404 metric=temperature window=3600s tenant=default.
+2026-04-15_10:00:00 | DEBUG   | query_service.py      | L51  | [query] Checking cache — key=summary:default:sensor-404:temperature:3600.
+2026-04-15_10:00:00 | DEBUG   | cache.py              | L34  | [cache] GET summary:default:sensor-404:temperature:3600.
+2026-04-15_10:00:00 | DEBUG   | cache.py              | L50  | [cache] GET summary:default:sensor-404:temperature:3600 -> MISS.
+2026-04-15_10:00:00 | INFO    | query_service.py      | L57  | [query] Cache miss — falling back to DB source=sensor-404 metric=temperature.
+2026-04-15_10:00:00 | DEBUG   | query_service.py      | L61  | [query] Querying metric_repo — source=sensor-404 window=3600s.
+2026-04-15_10:00:00 | DEBUG   | metric_repo.py        | L73  | [metric_repo] read_window — source=sensor-404 metric=temperature window=3600s table=metrics_default.
+2026-04-15_10:00:00 | DEBUG   | db.py                 | L62  | [db] acquire() called — available=5/5.
+2026-04-15_10:00:00 | DEBUG   | db.py                 | L82  | [db] Connection acquired — checked_out=1.
+2026-04-15_10:00:00 | WARNING | metric_repo.py        | L83  | [metric_repo] Query returned None for source=sensor-404 metric=temperature — possible statement timeout.
+2026-04-15_10:00:00 | DEBUG   | db.py                 | L88  | [db] Connection released — checked_out=0.
+2026-04-15_10:00:00 | DEBUG   | query_service.py      | L63  | [query] DB returned None rows.
+2026-04-15_10:00:00 | DEBUG   | query_service.py      | L66  | [query] Beginning aggregation — source=sensor-404.
+2026-04-15_10:00:00 | ERROR   | query_service.py      | L79  | AttributeError: 'NoneType' object has no attribute '__iter__'
+2026-04-15_10:00:00 | ERROR   | query.py              | L50  | Aggregation error — source='sensor-404': 'NoneType' object has no attribute '__iter__'
+2026-04-15_10:00:00 | ERROR   | main.py               | L83  | [t5u6v7w8] GET /api/v2/query/summary/sensor-404 → HTTP 500 in 31.7ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-15_11:30:00 | DEBUG   | main.py               | L75  | [x9y0z1a2] Incoming POST /api/v2/ingest/event from 10.0.1.44
+2026-04-15_11:30:00 | INFO    | ingest.py             | L42  | [x9y0z1a2] Ingest request for metric='cpu_usage' source='host-prod-05'.
+2026-04-15_11:30:00 | DEBUG   | auth_service.py       | L48  | Validating token (length=172).
+2026-04-15_11:30:00 | DEBUG   | auth_service.py       | L76  | Token valid — tenant=acme sub=pipeline-agent.
+2026-04-15_11:30:00 | INFO    | ingest.py             | L48  | [x9y0z1a2] Auth OK — tenant='acme'.
+2026-04-15_11:30:00 | DEBUG   | ingest_service.py     | L46  | [ingest] Entering pipeline — event_id=9e1f234a5b67 tenant=acme metric=cpu_usage.
+2026-04-15_11:30:00 | DEBUG   | ingest_service.py     | L52  | [ingest] Schema validation passed — event_id=9e1f234a5b67.
+2026-04-15_11:30:00 | DEBUG   | ingest_service.py     | L55  | [ingest] Resolving source_id=host-prod-05.
+2026-04-15_11:30:00 | DEBUG   | source_repo.py        | L27  | [source_repo] Fetching config — source_id=host-prod-05 tenant=acme.
+2026-04-15_11:30:00 | DEBUG   | db.py                 | L62  | [db] acquire() called — available=5/5.
+2026-04-15_11:30:00 | DEBUG   | db.py                 | L82  | [db] Connection acquired — checked_out=1.
+2026-04-15_11:30:00 | DEBUG   | db.py                 | L88  | [db] Connection released — checked_out=0.
+2026-04-15_11:30:00 | DEBUG   | ingest_service.py     | L59  | [ingest] Source resolved — retention=30d.
+2026-04-15_11:30:00 | INFO    | ingest_service.py     | L63  | [ingest] Writing metric to DB — event_id=9e1f234a5b67 source=host-prod-05.
+2026-04-15_11:30:00 | DEBUG   | metric_repo.py        | L31  | [metric_repo] Acquiring DB connection — table=metrics_acme metric=cpu_usage.
+2026-04-15_11:30:00 | DEBUG   | db.py                 | L62  | [db] acquire() called — available=0/5.
+2026-04-15_11:30:00 | WARNING | db.py                 | L71  | [db] Pool exhausted (5/5 in use). Waiting up to 2.0s for a free connection.
+2026-04-15_11:30:02 | ERROR   | db.py                 | L75  | OperationalError: Connection pool exhausted: all 5 connections are checked out. Increase pool_size or reduce query concurrency.
+2026-04-15_11:30:02 | ERROR   | metric_repo.py        | L33  | [metric_repo] Failed to acquire DB connection — OperationalError raised.
+2026-04-15_11:30:02 | ERROR   | ingest_service.py     | L63  | [ingest] DB write failed for event_id=9e1f234a5b67: Connection pool exhausted.
+2026-04-15_11:30:02 | ERROR   | ingest.py             | L59  | [x9y0z1a2] Ingest pipeline failed for metric='cpu_usage': Connection pool exhausted.
+2026-04-15_11:30:02 | ERROR   | main.py               | L83  | [x9y0z1a2] POST /api/v2/ingest/event → HTTP 500 in 2038.1ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-15_13:15:00 | DEBUG   | main.py               | L75  | [b3c4d5e6] Incoming GET /api/v2/query/summary/host-prod-07 from 10.0.5.21
+2026-04-15_13:15:00 | INFO    | query.py              | L35  | Summary query — source='host-prod-07' metric='net_tx_bytes' window=1800s.
+2026-04-15_13:15:00 | DEBUG   | query_service.py      | L45  | [query] Summary requested — source=host-prod-07 metric=net_tx_bytes window=1800s tenant=default.
+2026-04-15_13:15:00 | DEBUG   | query_service.py      | L51  | [query] Checking cache — key=summary:default:host-prod-07:net_tx_bytes:1800.
+2026-04-15_13:15:00 | DEBUG   | cache.py              | L34  | [cache] GET summary:default:host-prod-07:net_tx_bytes:1800.
+2026-04-15_13:15:00 | WARNING | cache.py              | L42  | [cache] Stampede detected on key=summary:default:host-prod-07:net_tx_bytes:1800. Waiting 1.5s for distributed lock.
+2026-04-15_13:15:01 | ERROR   | cache.py              | L46  | TimeoutError: Cache GET timed out after 1.5s waiting for lock on key='summary:default:host-prod-07:net_tx_bytes:1800'. Possible cache stampede — consider probabilistic early expiry.
+2026-04-15_13:15:01 | ERROR   | query_service.py      | L51  | [query] Cache read failed — key=summary:default:host-prod-07:net_tx_bytes:1800: Cache GET timed out.
+2026-04-15_13:15:01 | ERROR   | query.py              | L42  | Summary timed out — source='host-prod-07': Cache GET timed out after 1.5s.
+2026-04-15_13:15:01 | ERROR   | main.py               | L83  | [b3c4d5e6] GET /api/v2/query/summary/host-prod-07 → HTTP 503 in 1519.3ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---

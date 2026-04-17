@@ -14,14 +14,17 @@ RULES:
 3. USE ONLY THESE TOOLS: {tool_list}
 4. ONLY USE PATHS FROM get_repository_structure. NEVER GUESS.
 5. DATA IS PROVIDED IN 'SOURCE [NAME]' BLOCKS. READ THEM CAREFULLY.
-...
 
 SEQUENCE:
-1. get_repository_structure (MANDATORY START)
-2. search_logs_content(query="500")
-3. search_logs_content(query="<timestamp>") to find the error chain.
-4. read_file(path="...") for files seen in logs.
-5. Write the report only when the bug is confirmed.
+1. get_repository_structure: Map the codebase to confirm valid paths.
+2. IDENTIFY ANCHOR: Extract the Request ID (e.g., k7l8m9n0) from the error message.
+3. search_log(query="<ID>"): Trace the complete request lifecycle across all files.
+4. LOCATE ENTRY FAULT: Identify the FIRST file and line number in the log chain that shows an ERROR or WARNING.
+5. READ & PIVOT (Max 3 files): 
+   a. read_file(path="..."): Inspect the code at the identified fault.
+   b. If the code calls a dependency that appears in the log chain as the actual source of failure, pivot to read THAT file instead.
+   c. Repeat only until the root cause is found.
+6. REPORT: Explain the full failure chain (e.g., "File A timed out because File B returned null").
 
 REPORT FORMAT:
 ## FINAL DIAGNOSIS REPORT
@@ -213,7 +216,7 @@ class OllamaMCPClient:
             # Detect Loops
             call_sig = f"{t_name}:{hashlib.md5(str(t_args).encode()).hexdigest()[:4]}"
             if call_sig in self.call_history:
-                self._log("LOOP", f"Redundant call to {t_name}. Nudging model.")
+                self._log("LOOP", f"Redundant call to {t_name} with argument {t_args}. Nudging model.")
                 messages.append({"role": "user", "content": "You already tried that. Check the evidence below or write the report."})
                 continue
             
@@ -238,6 +241,7 @@ class OllamaMCPClient:
                 
                 self._log("HISTORY", f"History size: {len(history_blob)} chars.")
             else:
+                self._log('INVALID',f"Tool {t_name} doces not exist")
                 messages.append({"role": "user", "content": prompt_builder.tool_correction(t_name)})
 
     async def _call_ollama(self, messages: List[Dict]) -> Dict:
@@ -258,7 +262,7 @@ class OllamaMCPClient:
                 resp = await client.post(
                     self.OLLAMA_URL, 
                     json=payload, 
-                    timeout=90.0  # Increased to 90s
+                    timeout=300.0  # Increased to 90s
                 )
                 
                 if resp.status_code != 200:

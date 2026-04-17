@@ -1,0 +1,84 @@
+2026-04-14_06:00:01 | INFO    | main.py               | L62  | PulseMetrics starting up — initialising infrastructure.
+2026-04-14_06:00:01 | INFO    | db.py                 | L43  | [db] Connecting — pool_size=5.
+2026-04-14_06:00:02 | INFO    | db.py                 | L45  | [db] Connection pool ready.
+2026-04-14_06:00:02 | INFO    | cache.py              | L30  | [cache] Connecting to Redis.
+2026-04-14_06:00:02 | INFO    | cache.py              | L32  | [cache] Redis connection established.
+2026-04-14_06:00:02 | INFO    | main.py               | L64  | Infrastructure ready. Accepting requests.
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-14_08:14:05 | DEBUG   | main.py               | L75  | [a1b2c3d4] Incoming POST /api/v2/ingest/event from 10.0.1.44
+2026-04-14_08:14:05 | INFO    | ingest.py             | L42  | [a1b2c3d4] Ingest request for metric='cpu_usage' source='host-prod-01'.
+2026-04-14_08:14:05 | DEBUG   | auth_service.py       | L48  | Validating token (length=172).
+2026-04-14_08:14:05 | DEBUG   | auth_service.py       | L76  | Token valid — tenant=acme sub=pipeline-agent.
+2026-04-14_08:14:05 | INFO    | ingest.py             | L48  | [a1b2c3d4] Auth OK — tenant='acme'.
+2026-04-14_08:14:05 | DEBUG   | ingest_service.py     | L46  | [ingest] Entering pipeline — event_id=f3a8b21c9d01 tenant=acme metric=cpu_usage.
+2026-04-14_08:14:05 | DEBUG   | ingest_service.py     | L52  | [ingest] Schema validation passed — event_id=f3a8b21c9d01.
+2026-04-14_08:14:05 | DEBUG   | ingest_service.py     | L55  | [ingest] Resolving source_id=host-prod-01.
+2026-04-14_08:14:05 | DEBUG   | source_repo.py        | L27  | [source_repo] Fetching config — source_id=host-prod-01 tenant=acme.
+2026-04-14_08:14:05 | DEBUG   | db.py                 | L62  | [db] acquire() called — available=5/5.
+2026-04-14_08:14:05 | DEBUG   | db.py                 | L82  | [db] Connection acquired — checked_out=1.
+2026-04-14_08:14:05 | DEBUG   | db.py                 | L88  | [db] Connection released — checked_out=0.
+2026-04-14_08:14:05 | DEBUG   | ingest_service.py     | L59  | [ingest] Source resolved — retention=30d.
+2026-04-14_08:14:05 | INFO    | ingest_service.py     | L63  | [ingest] Writing metric to DB — event_id=f3a8b21c9d01 source=host-prod-01.
+2026-04-14_08:14:05 | DEBUG   | metric_repo.py        | L31  | [metric_repo] Acquiring DB connection — table=metrics_acme metric=cpu_usage.
+2026-04-14_08:14:05 | DEBUG   | db.py                 | L62  | [db] acquire() called — available=5/5.
+2026-04-14_08:14:05 | DEBUG   | db.py                 | L82  | [db] Connection acquired — checked_out=1.
+2026-04-14_08:14:05 | DEBUG   | metric_repo.py        | L35  | [metric_repo] Connection acquired from pool.
+2026-04-14_08:14:05 | DEBUG   | metric_repo.py        | L45  | [metric_repo] Executing INSERT — metric=cpu_usage.
+2026-04-14_08:14:05 | DEBUG   | metric_repo.py        | L54  | [metric_repo] INSERT complete — rows=1.
+2026-04-14_08:14:05 | DEBUG   | db.py                 | L88  | [db] Connection released — checked_out=0.
+2026-04-14_08:14:05 | DEBUG   | metric_repo.py        | L57  | [metric_repo] Connection returned to pool.
+2026-04-14_08:14:05 | INFO    | ingest_service.py     | L66  | [ingest] DB write OK — event_id=f3a8b21c9d01 rows=1.
+2026-04-14_08:14:05 | DEBUG   | ingest_service.py     | L70  | [ingest] Cache key invalidated — key=summary:acme:host-prod-01:cpu_usage.
+2026-04-14_08:14:05 | INFO    | ingest.py             | L55  | [a1b2c3d4] Event accepted — event_id='f3a8b21c9d01'.
+2026-04-14_08:14:05 | INFO    | main.py               | L83  | [a1b2c3d4] POST /api/v2/ingest/event → HTTP 200 in 11.2ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-14_09:30:00 | DEBUG   | main.py               | L75  | [e5f6a7b8] Incoming POST /api/v2/ingest/event from 10.0.2.11
+2026-04-14_09:30:00 | INFO    | ingest.py             | L42  | [e5f6a7b8] Ingest request for metric='memory_rss' source='host-prod-02'.
+2026-04-14_09:30:00 | DEBUG   | auth_service.py       | L48  | Validating token (length=0).
+2026-04-14_09:30:00 | WARNING | auth_service.py       | L57  | Malformed token: expected 3 parts, got 1.
+2026-04-14_09:30:00 | ERROR   | auth_service.py       | L58  | ValueError: Malformed token: expected 3 parts, got 1. Ensure the Authorization header is 'Bearer <token>'.
+2026-04-14_09:30:00 | WARNING | ingest.py             | L50  | [e5f6a7b8] Auth rejected for source='host-prod-02': Malformed token: expected 3 parts, got 1.
+2026-04-14_09:30:00 | INFO    | main.py               | L83  | [e5f6a7b8] POST /api/v2/ingest/event → HTTP 401 in 3.1ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-14_10:45:12 | DEBUG   | main.py               | L75  | [c9d0e1f2] Incoming GET /api/v2/query/summary/sensor-404 from 10.0.3.55
+2026-04-14_10:45:12 | INFO    | query.py              | L35  | Summary query — source='sensor-404' metric='temperature' window=3600s.
+2026-04-14_10:45:12 | DEBUG   | query_service.py      | L45  | [query] Summary requested — source=sensor-404 metric=temperature window=3600s tenant=default.
+2026-04-14_10:45:12 | DEBUG   | query_service.py      | L51  | [query] Checking cache — key=summary:default:sensor-404:temperature:3600.
+2026-04-14_10:45:12 | DEBUG   | cache.py              | L34  | [cache] GET summary:default:sensor-404:temperature:3600.
+2026-04-14_10:45:12 | DEBUG   | cache.py              | L50  | [cache] GET summary:default:sensor-404:temperature:3600 -> MISS.
+2026-04-14_10:45:12 | INFO    | query_service.py      | L57  | [query] Cache miss — falling back to DB source=sensor-404 metric=temperature.
+2026-04-14_10:45:12 | DEBUG   | query_service.py      | L61  | [query] Querying metric_repo — source=sensor-404 window=3600s.
+2026-04-14_10:45:12 | DEBUG   | metric_repo.py        | L73  | [metric_repo] read_window — source=sensor-404 metric=temperature window=3600s table=metrics_default.
+2026-04-14_10:45:12 | DEBUG   | db.py                 | L62  | [db] acquire() called — available=5/5.
+2026-04-14_10:45:12 | DEBUG   | db.py                 | L82  | [db] Connection acquired — checked_out=1.
+2026-04-14_10:45:12 | WARNING | metric_repo.py        | L83  | [metric_repo] Query returned None for source=sensor-404 metric=temperature — possible statement timeout.
+2026-04-14_10:45:12 | DEBUG   | db.py                 | L88  | [db] Connection released — checked_out=1.
+2026-04-14_10:45:12 | DEBUG   | query_service.py      | L63  | [query] DB returned None rows.
+2026-04-14_10:45:12 | DEBUG   | query_service.py      | L66  | [query] Beginning aggregation — source=sensor-404.
+2026-04-14_10:45:12 | ERROR   | query_service.py      | L79  | AttributeError: 'NoneType' object has no attribute '__iter__'
+2026-04-14_10:45:12 | ERROR   | query.py              | L50  | Aggregation error — source='sensor-404': 'NoneType' object has no attribute '__iter__'
+2026-04-14_10:45:12 | ERROR   | main.py               | L83  | [c9d0e1f2] GET /api/v2/query/summary/sensor-404 → HTTP 500 in 28.4ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-14_11:00:00 | DEBUG   | main.py               | L75  | [g3h4i5j6] Incoming POST /api/v2/ingest/event from 10.0.1.44
+2026-04-14_11:00:00 | INFO    | ingest.py             | L42  | [g3h4i5j6] Ingest request for metric='disk_io' source='host-prod-01'.
+2026-04-14_11:00:00 | DEBUG   | auth_service.py       | L48  | Validating token (length=172).
+2026-04-14_11:00:00 | DEBUG   | auth_service.py       | L76  | Token valid — tenant=acme sub=pipeline-agent.
+2026-04-14_11:00:00 | INFO    | ingest.py             | L48  | [g3h4i5j6] Auth OK — tenant='acme'.
+2026-04-14_11:00:00 | DEBUG   | ingest_service.py     | L46  | [ingest] Entering pipeline — event_id=7c3d912f4e55 tenant=acme metric=disk_io.
+2026-04-14_11:00:00 | DEBUG   | ingest_service.py     | L52  | [ingest] Schema validation passed — event_id=7c3d912f4e55.
+2026-04-14_11:00:00 | DEBUG   | ingest_service.py     | L55  | [ingest] Resolving source_id=host-prod-01.
+2026-04-14_11:00:00 | DEBUG   | source_repo.py        | L27  | [source_repo] Fetching config — source_id=host-prod-01 tenant=acme.
+2026-04-14_11:00:00 | DEBUG   | db.py                 | L62  | [db] acquire() called — available=5/5.
+2026-04-14_11:00:00 | DEBUG   | db.py                 | L82  | [db] Connection acquired — checked_out=1.
+2026-04-14_11:00:00 | DEBUG   | db.py                 | L88  | [db] Connection released — checked_out=0.
+2026-04-14_11:00:00 | DEBUG   | ingest_service.py     | L59  | [ingest] Source resolved — retention=30d.
+2026-04-14_11:00:00 | INFO    | ingest_service.py     | L63  | [ingest] Writing metric to DB — event_id=7c3d912f4e55 source=host-prod-01.
+2026-04-14_11:00:00 | DEBUG   | metric_repo.py        | L31  | [metric_repo] Acquiring DB connection — table=metrics_acme metric=disk_io.
+2026-04-14_11:00:00 | DEBUG   | db.py                 | L62  | [db] acquire() called — available=0/5.
+2026-04-14_11:00:00 | WARNING | db.py                 | L71  | [db] Pool exhausted (5/5 in use). Waiting up to 2.0s for a free connection.
+2026-04-14_11:00:02 | ERROR   | db.py                 | L75  | OperationalError: Connection pool exhausted: all 5 connections are checked out. Increase pool_size or reduce query concurrency.
+2026-04-14_11:00:02 | ERROR   | metric_repo.py        | L33  | [metric_repo] Failed to acquire DB connection — OperationalError raised.
+2026-04-14_11:00:02 | ERROR   | ingest_service.py     | L63  | [ingest] DB write failed for event_id=7c3d912f4e55: Connection pool exhausted.
+2026-04-14_11:00:02 | ERROR   | ingest.py             | L59  | [g3h4i5j6] Ingest pipeline failed for metric='disk_io': Connection pool exhausted.
+2026-04-14_11:00:02 | ERROR   | main.py               | L83  | [g3h4i5j6] POST /api/v2/ingest/event → HTTP 500 in 2041.3ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---

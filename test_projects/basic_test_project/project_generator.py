@@ -352,63 +352,63 @@ class AppLogger:
 # ─────────────────────────────────────────────
 
 LOG_APR_11 = """\
-2026-04-11_08:02:14 || main.py || 47 || Request GET /health completed in 1.2ms → HTTP 200
-2026-04-11_08:15:30 || endpoints.py || 33 || Fetching feed 'market-data-eu' from upstream provider.
-2026-04-11_08:15:30 || external_client.py || 34 || Failed to connect to https://provider.internal/api/feeds/market-data-eu: upstream host returned 503 Service Unavailable.
-2026-04-11_08:15:30 || endpoints.py || 39 || Upstream provider unavailable for feed 'market-data-eu': Failed to connect to https://provider.internal/api/feeds/market-data-eu: upstream host returned 503 Service Unavailable.
-2026-04-11_08:15:30 || main.py || 47 || Request GET /api/v1/feeds/market-data-eu completed in 18.4ms → HTTP 503
-2026-04-11_09:00:05 || endpoints.py || 50 || Retrieving record id=1042.
-2026-04-11_09:00:05 || data_processor.py || 28 || invalid literal for int() with base 10: 'not-a-number'
-2026-04-11_09:00:05 || endpoints.py || 55 || Schema validation failed for record id=1042: invalid literal for int() with base 10: 'not-a-number'
-2026-04-11_09:00:05 || main.py || 47 || Request GET /api/v1/records/1042 completed in 12.7ms → HTTP 500
-2026-04-11_10:30:00 || endpoints.py || 65 || Processing feed='inventory' record=77 divisor=10.
-2026-04-11_10:30:00 || main.py || 47 || Request POST /api/v1/process completed in 5.1ms → HTTP 200
-2026-04-11_11:45:18 || endpoints.py || 33 || Fetching feed 'pricing-feed' from upstream provider.
-2026-04-11_11:45:18 || external_client.py || 34 || Failed to connect to https://provider.internal/api/feeds/pricing-feed: upstream host returned 503 Service Unavailable.
-2026-04-11_11:45:18 || endpoints.py || 39 || Upstream provider unavailable for feed 'pricing-feed': Failed to connect to https://provider.internal/api/feeds/pricing-feed: upstream host returned 503 Service Unavailable.
-2026-04-11_11:45:18 || main.py || 47 || Request GET /api/v1/feeds/pricing-feed completed in 14.9ms → HTTP 503
-2026-04-11_14:22:44 || endpoints.py || 88 || Summary requested, limit=25.
-2026-04-11_14:22:44 || main.py || 47 || Request GET /api/v1/summary completed in 2.3ms → HTTP 200
-2026-04-11_16:05:01 || endpoints.py || 65 || Processing feed='orders' record=305 divisor=0.
-2026-04-11_16:05:01 || data_processor.py || 52 || division by zero
-2026-04-11_16:05:01 || endpoints.py || 79 || Computation error for feed='orders' record=305: division by zero
-2026-04-11_16:05:01 || main.py || 47 || Request POST /api/v1/process completed in 9.8ms → HTTP 500
-2026-04-11_17:58:33 || endpoints.py || 50 || Retrieving record id=2201.
-2026-04-11_17:58:33 || data_processor.py || 28 || invalid literal for int() with base 10: 'not-a-number'
-2026-04-11_17:58:33 || endpoints.py || 55 || Schema validation failed for record id=2201: invalid literal for int() with base 10: 'not-a-number'
-2026-04-11_17:58:33 || main.py || 47 || Request GET /api/v1/records/2201 completed in 11.2ms → HTTP 500
+2026-04-11_08:02:14 | INFO  | main.py             | L47  | Request GET /health completed in 1.2ms → HTTP 200
+2026-04-11_08:15:30 | INFO  | endpoints.py        | L33  | Fetching feed 'market-data-eu' from upstream provider.
+2026-04-11_08:15:30 | ERROR | external_client.py  | L34  | Failed to connect to https://provider.internal/api/feeds/market-data-eu: host returned 503.
+2026-04-11_08:15:30 | ERROR | endpoints.py        | L39  | Upstream provider unavailable for feed 'market-data-eu': host returned 503.
+2026-04-11_08:15:30 | INFO  | main.py             | L47  | Request GET /api/v1/feeds/market-data-eu completed in 18.4ms → HTTP 503
+2026-04-11_09:00:05 | INFO  | endpoints.py        | L50  | Retrieving record id=1042.
+2026-04-11_09:00:05 | ERROR | data_processor.py   | L28  | ValueError: invalid literal for int() with base 10: 'not-a-number'
+2026-04-11_09:00:05 | ERROR | endpoints.py        | L57  | Schema validation failed for record id=1042: invalid literal for int().
+2026-04-11_09:00:05 | INFO  | main.py             | L47  | Request GET /api/v1/records/1042 completed in 12.7ms → HTTP 500
+2026-04-11_10:30:00 | INFO  | endpoints.py        | L67  | Processing feed='inventory' record=77 divisor=10.
+2026-04-11_10:30:00 | INFO  | main.py             | L47  | Request POST /api/v1/process completed in 5.1ms → HTTP 200
+2026-04-11_11:45:18 | INFO  | endpoints.py        | L33  | Fetching feed 'pricing-feed' from upstream provider.
+2026-04-11_11:45:18 | ERROR | external_client.py  | L34  | Failed to connect to https://provider.internal/api/feeds/pricing-feed: 503.
+2026-04-11_11:45:18 | ERROR | endpoints.py        | L39  | Upstream provider unavailable for feed 'pricing-feed': host returned 503.
+2026-04-11_11:45:18 | INFO  | main.py             | L47  | Request GET /api/v1/feeds/pricing-feed completed in 14.9ms → HTTP 503
+2026-04-11_14:22:44 | INFO  | endpoints.py        | L91  | Summary requested, limit=25.
+2026-04-11_14:22:44 | INFO  | main.py             | L47  | Request GET /api/v1/summary completed in 2.3ms → HTTP 200
+2026-04-11_16:05:01 | INFO  | endpoints.py        | L67  | Processing feed='orders' record=305 divisor=0.
+2026-04-11_16:05:01 | ERROR | data_processor.py   | L52  | ZeroDivisionError: division by zero
+2026-04-11_16:05:01 | ERROR | endpoints.py        | L81  | Computation error for feed='orders' record=305: division by zero
+2026-04-11_16:05:01 | INFO  | main.py             | L47  | Request POST /api/v1/process completed in 9.8ms → HTTP 500
+2026-04-11_17:58:33 | INFO  | endpoints.py        | L50  | Retrieving record id=2201.
+2026-04-11_17:58:33 | ERROR | data_processor.py   | L28  | ValueError: invalid literal for int() with base 10: 'not-a-number'
+2026-04-11_17:58:33 | ERROR | endpoints.py        | L57  | Schema validation failed for record id=2201: invalid literal for int().
+2026-04-11_17:58:33 | INFO  | main.py             | L47  | Request GET /api/v1/records/2201 completed in 11.2ms → HTTP 500
 """
 
 LOG_APR_12 = """\
-2026-04-12_07:44:10 || main.py || 47 || Request GET /health completed in 0.9ms → HTTP 200
-2026-04-12_08:30:22 || endpoints.py || 33 || Fetching feed 'realtime-quotes' from upstream provider.
-2026-04-12_08:30:22 || external_client.py || 34 || Failed to connect to https://provider.internal/api/feeds/realtime-quotes: upstream host returned 503 Service Unavailable.
-2026-04-12_08:30:22 || endpoints.py || 39 || Upstream provider unavailable for feed 'realtime-quotes': Failed to connect to https://provider.internal/api/feeds/realtime-quotes: upstream host returned 503 Service Unavailable.
-2026-04-12_08:30:22 || main.py || 47 || Request GET /api/v1/feeds/realtime-quotes completed in 20.1ms → HTTP 503
-2026-04-12_09:15:45 || endpoints.py || 65 || Processing feed='settlements' record=99 divisor=0.
-2026-04-12_09:15:45 || data_processor.py || 52 || division by zero
-2026-04-12_09:15:45 || endpoints.py || 79 || Computation error for feed='settlements' record=99: division by zero
-2026-04-12_09:15:45 || main.py || 47 || Request POST /api/v1/process completed in 8.5ms → HTTP 500
-2026-04-12_10:00:00 || endpoints.py || 88 || Summary requested, limit=10.
-2026-04-12_10:00:00 || main.py || 47 || Request GET /api/v1/summary completed in 1.8ms → HTTP 200
-2026-04-12_11:27:03 || endpoints.py || 50 || Retrieving record id=8801.
-2026-04-12_11:27:03 || data_processor.py || 28 || invalid literal for int() with base 10: 'not-a-number'
-2026-04-12_11:27:03 || endpoints.py || 55 || Schema validation failed for record id=8801: invalid literal for int() with base 10: 'not-a-number'
-2026-04-12_11:27:03 || main.py || 47 || Request GET /api/v1/records/8801 completed in 13.6ms → HTTP 500
-2026-04-12_12:50:19 || endpoints.py || 33 || Fetching feed 'fx-rates' from upstream provider.
-2026-04-12_12:50:19 || external_client.py || 34 || Failed to connect to https://provider.internal/api/feeds/fx-rates: upstream host returned 503 Service Unavailable.
-2026-04-12_12:50:19 || endpoints.py || 39 || Upstream provider unavailable for feed 'fx-rates': Failed to connect to https://provider.internal/api/feeds/fx-rates: upstream host returned 503 Service Unavailable.
-2026-04-12_12:50:19 || main.py || 47 || Request GET /api/v1/feeds/fx-rates completed in 17.3ms → HTTP 503
-2026-04-12_14:05:55 || endpoints.py || 65 || Processing feed='reconciliation' record=512 divisor=8.
-2026-04-12_14:05:55 || main.py || 47 || Request POST /api/v1/process completed in 4.2ms → HTTP 200
-2026-04-12_15:38:47 || endpoints.py || 65 || Processing feed='audit' record=1 divisor=0.
-2026-04-12_15:38:47 || data_processor.py || 52 || division by zero
-2026-04-12_15:38:47 || endpoints.py || 79 || Computation error for feed='audit' record=1: division by zero
-2026-04-12_15:38:47 || main.py || 47 || Request POST /api/v1/process completed in 7.0ms → HTTP 500
-2026-04-12_16:59:12 || endpoints.py || 50 || Retrieving record id=3374.
-2026-04-12_16:59:12 || data_processor.py || 28 || invalid literal for int() with base 10: 'not-a-number'
-2026-04-12_16:59:12 || endpoints.py || 55 || Schema validation failed for record id=3374: invalid literal for int() with base 10: 'not-a-number'
-2026-04-12_16:59:12 || main.py || 47 || Request GET /api/v1/records/3374 completed in 10.9ms → HTTP 500
+2026-04-12_07:44:10 | INFO  | main.py             | L47  | Request GET /health completed in 0.9ms → HTTP 200
+2026-04-12_08:30:22 | INFO  | endpoints.py        | L33  | Fetching feed 'realtime-quotes' from upstream provider.
+2026-04-12_08:30:22 | ERROR | external_client.py  | L34  | Failed to connect to https://provider.internal/api/feeds/realtime-quotes: host returned 503.
+2026-04-12_08:30:22 | ERROR | endpoints.py        | L39  | Upstream provider unavailable for feed 'realtime-quotes': host returned 503.
+2026-04-12_08:30:22 | INFO  | main.py             | L47  | Request GET /api/v1/feeds/realtime-quotes completed in 20.1ms → HTTP 503
+2026-04-12_09:15:45 | INFO  | endpoints.py        | L67  | Processing feed='settlements' record=99 divisor=0.
+2026-04-12_09:15:45 | ERROR | data_processor.py   | L52  | ZeroDivisionError: division by zero
+2026-04-12_09:15:45 | ERROR | endpoints.py        | L81  | Computation error for feed='settlements' record=99: division by zero
+2026-04-12_09:15:45 | INFO  | main.py             | L47  | Request POST /api/v1/process completed in 8.5ms → HTTP 500
+2026-04-12_10:00:00 | INFO  | endpoints.py        | L91  | Summary requested, limit=10.
+2026-04-12_10:00:00 | INFO  | main.py             | L47  | Request GET /api/v1/summary completed in 1.8ms → HTTP 200
+2026-04-12_11:27:03 | INFO  | endpoints.py        | L50  | Retrieving record id=8801.
+2026-04-12_11:27:03 | ERROR | data_processor.py   | L28  | ValueError: invalid literal for int() with base 10: 'not-a-number'
+2026-04-12_11:27:03 | ERROR | endpoints.py        | L57  | Schema validation failed for record id=8801: invalid literal for int().
+2026-04-12_11:27:03 | INFO  | main.py             | L47  | Request GET /api/v1/records/8801 completed in 13.6ms → HTTP 500
+2026-04-12_12:50:19 | INFO  | endpoints.py        | L33  | Fetching feed 'fx-rates' from upstream provider.
+2026-04-12_12:50:19 | ERROR | external_client.py  | L34  | Failed to connect to https://provider.internal/api/feeds/fx-rates: host returned 503.
+2026-04-12_12:50:19 | ERROR | endpoints.py        | L39  | Upstream provider unavailable for feed 'fx-rates': host returned 503.
+2026-04-12_12:50:19 | INFO  | main.py             | L47  | Request GET /api/v1/feeds/fx-rates completed in 17.3ms → HTTP 503
+2026-04-12_14:05:55 | INFO  | endpoints.py        | L67  | Processing feed='reconciliation' record=512 divisor=8.
+2026-04-12_14:05:55 | INFO  | main.py             | L47  | Request POST /api/v1/process completed in 4.2ms → HTTP 200
+2026-04-12_15:38:47 | INFO  | endpoints.py        | L67  | Processing feed='audit' record=1 divisor=0.
+2026-04-12_15:38:47 | ERROR | data_processor.py   | L52  | ZeroDivisionError: division by zero
+2026-04-12_15:38:47 | ERROR | endpoints.py        | L81  | Computation error for feed='audit' record=1: division by zero
+2026-04-12_15:38:47 | INFO  | main.py             | L47  | Request POST /api/v1/process completed in 7.0ms → HTTP 500
+2026-04-12_16:59:12 | INFO  | endpoints.py        | L50  | Retrieving record id=3374.
+2026-04-12_16:59:12 | ERROR | data_processor.py   | L28  | ValueError: invalid literal for int() with base 10: 'not-a-number'
+2026-04-12_16:59:12 | ERROR | endpoints.py        | L57  | Schema validation failed for record id=3374: invalid literal for int().
+2026-04-12_16:59:12 | INFO  | main.py             | L47  | Request GET /api/v1/records/3374 completed in 10.9ms → HTTP 500
 """
 
 # ─────────────────────────────────────────────
