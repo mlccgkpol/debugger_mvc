@@ -1,0 +1,153 @@
+2026-04-20_06:00:00 | INFO    | main.py               | L27  | OrderService starting up - initialising infrastructure.
+2026-04-20_06:00:00 | INFO    | db.py                 | L18  | [db] Opening pool - dsn='postgresql://order_rw@pg-orders.biterush.svc.cluster.local:5432/biterush_orders' size=10.
+2026-04-20_06:00:01 | INFO    | db.py                 | L21  | [db] Pool ready.
+2026-04-20_06:00:01 | INFO    | redis_client.py       | L28  | [redis] Connecting - redis-primary.biterush.svc.cluster.local:6379/0.
+2026-04-20_06:00:01 | INFO    | redis_client.py       | L36  | [redis] Connection established.
+2026-04-20_06:00:01 | INFO    | kafka_client.py       | L23  | [kafka] Starting producer - brokers=kafka-1.biterush.svc:9092,kafka-2.biterush.svc:9092.
+2026-04-20_06:00:02 | INFO    | kafka_client.py       | L32  | [kafka] Producer ready.
+2026-04-20_06:00:02 | INFO    | kafka_client.py       | L63  | [kafka] Starting consumer group=biterush.order-service.payment topics=['payment.completed', 'payment.failed'].
+2026-04-20_06:00:02 | INFO    | kafka_client.py       | L72  | [kafka] Consumer ready - group=biterush.order-service.payment.
+2026-04-20_06:00:02 | INFO    | kafka_client.py       | L63  | [kafka] Starting consumer group=biterush.order-service.inventory topics=['inventory.reserved', 'inventory.reservation_failed'].
+2026-04-20_06:00:02 | INFO    | kafka_client.py       | L72  | [kafka] Consumer ready - group=biterush.order-service.inventory.
+2026-04-20_06:00:02 | INFO    | main.py               | L35  | OrderService ready. Accepting requests.
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-20_06:00:05 | INFO    | main.py               | L27  | InventoryService starting up.
+2026-04-20_06:00:05 | INFO    | db.py                 | L18  | [db] Opening pool - dsn='postgresql://inv_rw@pg-inventory.biterush.svc:5432/biterush_inventory' size=10.
+2026-04-20_06:00:06 | INFO    | db.py                 | L21  | [db] Pool ready.
+2026-04-20_06:00:06 | INFO    | redis_client.py       | L28  | [redis] Connecting - redis-primary.biterush.svc.cluster.local:6379/0.
+2026-04-20_06:00:06 | INFO    | redis_client.py       | L36  | [redis] Connection established.
+2026-04-20_06:00:06 | INFO    | kafka_client.py       | L23  | [kafka] Starting producer - brokers=kafka-1.biterush.svc:9092,kafka-2.biterush.svc:9092.
+2026-04-20_06:00:06 | INFO    | kafka_client.py       | L32  | [kafka] Producer ready.
+2026-04-20_06:00:06 | INFO    | kafka_client.py       | L63  | [kafka] Starting consumer group=biterush.inventory-service.orders topics=['order.created', 'order.cancelled'].
+2026-04-20_06:00:06 | INFO    | kafka_client.py       | L72  | [kafka] Consumer ready - group=biterush.inventory-service.orders.
+2026-04-20_06:00:06 | INFO    | main.py               | L35  | InventoryService ready.
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-20_06:00:08 | INFO    | main.py               | L27  | PaymentService starting up.
+2026-04-20_06:00:09 | INFO    | db.py                 | L21  | [db] Pool ready.
+2026-04-20_06:00:09 | INFO    | kafka_client.py       | L32  | [kafka] Producer ready.
+2026-04-20_06:00:09 | INFO    | kafka_client.py       | L72  | [kafka] Consumer ready - group=biterush.payment-service.orders.
+2026-04-20_06:00:09 | INFO    | main.py               | L35  | PaymentService ready.
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-20_06:00:10 | INFO    | main.py               | L27  | UserService starting up.
+2026-04-20_06:00:11 | INFO    | db.py                 | L21  | [db] Pool ready.
+2026-04-20_06:00:11 | INFO    | redis_client.py       | L36  | [redis] Connection established.
+2026-04-20_06:00:11 | INFO    | main.py               | L35  | UserService ready.
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-20_06:00:12 | INFO    | main.py               | L27  | NotificationService starting up.
+2026-04-20_06:00:12 | INFO    | redis_client.py       | L36  | [redis] Connection established.
+2026-04-20_06:00:12 | INFO    | kafka_client.py       | L72  | [kafka] Consumer ready - group=biterush.notification-service.orders.
+2026-04-20_06:00:12 | INFO    | kafka_client.py       | L72  | [kafka] Consumer ready - group=biterush.notification-service.payments.
+2026-04-20_06:00:12 | INFO    | main.py               | L35  | NotificationService ready.
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-20_09:15:22 | DEBUG   | main.py               | L55  | [a3f7c1b2] Incoming POST /api/v1/auth/login from 10.0.4.12
+2026-04-20_09:15:22 | INFO    | auth.py               | L44  | [auth] Login request - email=priya.sharma@gmail.com.
+2026-04-20_09:15:22 | DEBUG   | auth_service.py       | L64  | [auth_svc] Validating token (len=0).
+2026-04-20_09:15:22 | DEBUG   | user_repo.py          | L14  | [db] Acquired - checked_out=1/10.
+2026-04-20_09:15:22 | INFO    | auth_service.py       | L55  | [auth_svc] Token issued - user_id=USR-A1B2C3D4.
+2026-04-20_09:15:22 | INFO    | auth.py               | L47  | [auth] Login successful - user_id=USR-A1B2C3D4.
+2026-04-20_09:15:22 | INFO    | main.py               | L67  | [a3f7c1b2] POST /api/v1/auth/login -> HTTP 200 in 48.3ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-20_09:16:01 | DEBUG   | main.py               | L55  | [b9d2e4f1] Incoming POST /api/v1/cart/cart-88fa3bc1/items from 10.0.4.12
+2026-04-20_09:16:01 | INFO    | cart.py               | L31  | [cart] Add item - cart_id=cart-88fa3bc1 item_id=ITEM-BASMATI-5KG qty=2.
+2026-04-20_09:16:01 | DEBUG   | cart_service.py       | L30  | [cart] add_item - cart_id=cart-88fa3bc1 item_id=ITEM-BASMATI-5KG qty=2.
+2026-04-20_09:16:01 | INFO    | cart_service.py       | L53  | [cart] Item added - cart_id=cart-88fa3bc1 item_id=ITEM-BASMATI-5KG total_items=1.
+2026-04-20_09:16:01 | INFO    | main.py               | L67  | [b9d2e4f1] POST /api/v1/cart/cart-88fa3bc1/items -> HTTP 200 in 22.1ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-20_09:16:14 | DEBUG   | main.py               | L55  | [c2a1f8e0] Incoming POST /api/v1/cart/cart-88fa3bc1/items from 10.0.4.12
+2026-04-20_09:16:14 | INFO    | cart.py               | L31  | [cart] Add item - cart_id=cart-88fa3bc1 item_id=ITEM-WHOLE-MILK-1L qty=6.
+2026-04-20_09:16:14 | DEBUG   | cart_service.py       | L30  | [cart] add_item - cart_id=cart-88fa3bc1 item_id=ITEM-WHOLE-MILK-1L qty=6.
+2026-04-20_09:16:14 | INFO    | cart_service.py       | L53  | [cart] Item added - cart_id=cart-88fa3bc1 item_id=ITEM-WHOLE-MILK-1L total_items=2.
+2026-04-20_09:16:14 | INFO    | main.py               | L67  | [c2a1f8e0] POST /api/v1/cart/cart-88fa3bc1/items -> HTTP 200 in 19.4ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-20_09:17:44 | DEBUG   | main.py               | L55  | [d5e3b7a9] Incoming POST /api/v1/orders from 10.0.4.12
+2026-04-20_09:17:44 | INFO    | orders.py             | L36  | [n/a] Place order request - cart_id=cart-88fa3bc1 method=card.
+2026-04-20_09:17:44 | DEBUG   | order_service.py      | L35  | [order] New placement attempt - order_id=ORD-F4A1B2C3 cart_id=cart-88fa3bc1.
+2026-04-20_09:17:44 | DEBUG   | order_service.py      | L38  | [order] Validating user token - order_id=ORD-F4A1B2C3.
+2026-04-20_09:17:44 | INFO    | order_service.py      | L41  | [order] User validated - user_id=USR-A1B2C3D4 order_id=ORD-F4A1B2C3.
+2026-04-20_09:17:44 | DEBUG   | order_service.py      | L44  | [order] Loading cart - cart_id=cart-88fa3bc1.
+2026-04-20_09:17:44 | DEBUG   | order_service.py      | L49  | [order] Cart loaded - 2 items.
+2026-04-20_09:17:44 | DEBUG   | order_service.py      | L52  | [order] Checking inventory - order_id=ORD-F4A1B2C3.
+2026-04-20_09:17:44 | INFO    | order_service.py      | L54  | [order] Inventory confirmed available - order_id=ORD-F4A1B2C3.
+2026-04-20_09:17:44 | DEBUG   | order_service.py      | L57  | [order] Validating delivery address - address_id=ADDR-001.
+2026-04-20_09:17:44 | DEBUG   | order_service.py      | L59  | [order] Address validated - city=Mumbai.
+2026-04-20_09:17:44 | DEBUG   | order_service.py      | L66  | [order] Totals - subtotal=649.00 discount=0 gst=32.45 delivery=29.00 total=710.45.
+2026-04-20_09:17:44 | INFO    | order_service.py      | L74  | [order] Persisting order record - order_id=ORD-F4A1B2C3.
+2026-04-20_09:17:44 | DEBUG   | order_repo.py         | L14  | [order_repo] Inserting order - order_id=ORD-F4A1B2C3.
+2026-04-20_09:17:44 | INFO    | order_service.py      | L76  | [order] Order record created - order_id=ORD-F4A1B2C3 status=pending_payment.
+2026-04-20_09:17:44 | DEBUG   | order_service.py      | L79  | [order] Publishing order.created event - order_id=ORD-F4A1B2C3.
+2026-04-20_09:17:44 | DEBUG   | kafka_client.py       | L45  | [kafka] Publishing to topic=order.created key=ORD-F4A1B2C3.
+2026-04-20_09:17:44 | DEBUG   | kafka_client.py       | L50  | [kafka] Published to topic=order.created key=ORD-F4A1B2C3.
+2026-04-20_09:17:44 | INFO    | order_service.py      | L81  | [order] order.created published - order_id=ORD-F4A1B2C3.
+2026-04-20_09:17:44 | DEBUG   | order_service.py      | L84  | [order] Initiating payment - order_id=ORD-F4A1B2C3 method=card.
+2026-04-20_09:17:44 | DEBUG   | stripe_gateway.py     | L17  | [stripe] Creating PaymentIntent - order_id=ORD-F4A1B2C3 amount_paise=71045.
+2026-04-20_09:17:45 | INFO    | stripe_gateway.py     | L29  | [stripe] PaymentIntent created - id=pi_3Ptest001 order_id=ORD-F4A1B2C3.
+2026-04-20_09:17:45 | INFO    | order_service.py      | L88  | [order] Payment initiated - order_id=ORD-F4A1B2C3 payment_id=PAY-9E2D1A3B status=pending.
+2026-04-20_09:17:45 | INFO    | order_service.py      | L91  | [order] Order status updated - order_id=ORD-F4A1B2C3 status=awaiting_payment.
+2026-04-20_09:17:45 | INFO    | orders.py             | L55  | [n/a] Order placed - order_id=ORD-F4A1B2C3 total=710.45.
+2026-04-20_09:17:45 | INFO    | main.py               | L67  | [d5e3b7a9] POST /api/v1/orders -> HTTP 200 in 1243.7ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-20_09:17:46 | INFO    | kafka_client.py       | L80  | [kafka] Received topic=order.created partition=0 offset=1441 key=ORD-F4A1B2C3.
+2026-04-20_09:17:46 | INFO    | order_consumer.py     | L28  | [inventory/order-consumer] Event received - order_id=ORD-F4A1B2C3 hint=created.
+2026-04-20_09:17:46 | INFO    | reservation_service.py | L24  | [reservation] Reserving stock - order_id=ORD-F4A1B2C3 items=2.
+2026-04-20_09:17:46 | DEBUG   | reservation_service.py | L35  | [reservation] Advisory lock acquired - order_id=ORD-F4A1B2C3.
+2026-04-20_09:17:46 | DEBUG   | reservation_service.py | L47  | [reservation] Decremented - item_id=ITEM-BASMATI-5KG qty=2 remaining=48.
+2026-04-20_09:17:46 | DEBUG   | reservation_service.py | L47  | [reservation] Decremented - item_id=ITEM-WHOLE-MILK-1L qty=6 remaining=74.
+2026-04-20_09:17:46 | INFO    | reservation_service.py | L68  | [reservation] Stock reserved - order_id=ORD-F4A1B2C3 items=[{'item_id': 'ITEM-BASMATI-5KG', 'quantity': 2}, {'item_id': 'ITEM-WHOLE-MILK-1L', 'quantity': 6}].
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-20_09:17:55 | INFO    | kafka_client.py       | L80  | [kafka] Received topic=order.created partition=0 offset=1441 key=ORD-F4A1B2C3.
+2026-04-20_09:17:55 | INFO    | order_consumer.py     | L28  | [notif/order-consumer] Processing event - order_id=ORD-F4A1B2C3 type=created.
+2026-04-20_09:17:55 | INFO    | notification_service.py | L41  | [notif] Sending notification - user_id=USR-A1B2C3D4 template=order_placed channels=sms_email.
+2026-04-20_09:17:55 | DEBUG   | sms_sender.py         | L16  | [sms] Sending to=+919876543210 template=order_placed.
+2026-04-20_09:17:56 | DEBUG   | sms_sender.py         | L21  | [sms] Delivered - phone=+919876543210 status=200.
+2026-04-20_09:17:56 | INFO    | notification_service.py | L48  | [notif] SMS sent - user_id=USR-A1B2C3D4 template=order_placed.
+2026-04-20_09:17:56 | DEBUG   | email_sender.py       | L19  | [email] Sending to=priya.sharma@gmail.com template=order_placed.
+2026-04-20_09:17:57 | DEBUG   | email_sender.py       | L24  | [email] Delivered - email=priya.sharma@gmail.com.
+2026-04-20_09:17:57 | INFO    | notification_service.py | L55  | [notif] Email sent - user_id=USR-A1B2C3D4 template=order_placed.
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-20_10:04:11 | DEBUG   | main.py               | L55  | [e8c9d2a0] Incoming POST /api/v1/payments/webhook/stripe from 54.187.174.169
+2026-04-20_10:04:11 | INFO    | payments.py           | L52  | [webhook] Stripe webhook received - sig_present=True.
+2026-04-20_10:04:11 | INFO    | payment_service.py    | L51  | [payment] Stripe webhook - event_type=payment_intent.succeeded event_id=evt_3Ptest001.
+2026-04-20_10:04:11 | INFO    | payment_service.py    | L61  | [payment] Payment completed via webhook - order_id=ORD-F4A1B2C3 amount=710.45.
+2026-04-20_10:04:11 | DEBUG   | kafka_client.py       | L50  | [kafka] Published to topic=payment.completed key=ORD-F4A1B2C3.
+2026-04-20_10:04:11 | INFO    | main.py               | L67  | [e8c9d2a0] POST /api/v1/payments/webhook/stripe -> HTTP 200 in 88.4ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-20_10:04:11 | INFO    | kafka_client.py       | L80  | [kafka] Received topic=payment.completed partition=1 offset=882 key=ORD-F4A1B2C3.
+2026-04-20_10:04:11 | INFO    | payment_consumer.py   | L26  | [order/payment-consumer] Received payment event - order_id=ORD-F4A1B2C3 status=completed.
+2026-04-20_10:04:11 | INFO    | payment_consumer.py   | L31  | [order/payment-consumer] Order confirmed - order_id=ORD-F4A1B2C3.
+2026-04-20_10:04:11 | DEBUG   | kafka_client.py       | L50  | [kafka] Published to topic=order.confirmed key=ORD-F4A1B2C3.
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-20_10:04:12 | INFO    | kafka_client.py       | L80  | [kafka] Received topic=order.confirmed partition=0 offset=1442 key=ORD-F4A1B2C3.
+2026-04-20_10:04:12 | INFO    | order_consumer.py     | L28  | [notif/order-consumer] Processing event - order_id=ORD-F4A1B2C3 type=confirmed.
+2026-04-20_10:04:12 | INFO    | notification_service.py | L41  | [notif] Sending notification - user_id=USR-A1B2C3D4 template=order_confirmed channels=sms_push.
+2026-04-20_10:04:12 | INFO    | notification_service.py | L48  | [notif] SMS sent - user_id=USR-A1B2C3D4 template=order_confirmed.
+2026-04-20_10:04:12 | INFO    | notification_service.py | L55  | [notif] Push sent - user_id=USR-A1B2C3D4 template=order_confirmed.
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-20_11:30:00 | DEBUG   | main.py               | L55  | [f1a2b3c4] Incoming POST /api/v1/orders from 10.0.7.88
+2026-04-20_11:30:00 | INFO    | orders.py             | L36  | [n/a] Place order request - cart_id=cart-d4e5f6a7 method=wallet.
+2026-04-20_11:30:00 | DEBUG   | order_service.py      | L35  | [order] New placement attempt - order_id=ORD-C9D8E7F6 cart_id=cart-d4e5f6a7.
+2026-04-20_11:30:00 | DEBUG   | order_service.py      | L38  | [order] Validating user token - order_id=ORD-C9D8E7F6.
+2026-04-20_11:30:00 | INFO    | order_service.py      | L41  | [order] User validated - user_id=USR-B5C6D7E8 order_id=ORD-C9D8E7F6.
+2026-04-20_11:30:00 | DEBUG   | order_service.py      | L44  | [order] Loading cart - cart_id=cart-d4e5f6a7.
+2026-04-20_11:30:00 | DEBUG   | order_service.py      | L49  | [order] Cart loaded - 3 items.
+2026-04-20_11:30:00 | DEBUG   | order_service.py      | L52  | [order] Checking inventory - order_id=ORD-C9D8E7F6.
+2026-04-20_11:30:01 | WARNING | order_service.py      | L54  | [order] Inventory check returned unavailable items: ['ITEM-ALPHONSO-MANGO-1KG'].
+2026-04-20_11:30:01 | WARNING | orders.py             | L62  | [n/a] Validation failed: Items out of stock: ['ITEM-ALPHONSO-MANGO-1KG'].
+2026-04-20_11:30:01 | ERROR   | main.py               | L67  | [f1a2b3c4] POST /api/v1/orders -> HTTP 422 in 891.2ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-20_13:45:00 | DEBUG   | main.py               | L55  | [g7h8i9j0] Incoming POST /api/v1/orders from 10.0.2.33
+2026-04-20_13:45:00 | INFO    | orders.py             | L36  | [n/a] Place order request - cart_id=cart-99ba11cc method=card.
+2026-04-20_13:45:00 | DEBUG   | order_service.py      | L35  | [order] New placement attempt - order_id=ORD-A2B3C4D5 cart_id=cart-99ba11cc.
+2026-04-20_13:45:00 | DEBUG   | order_service.py      | L38  | [order] Validating user token - order_id=ORD-A2B3C4D5.
+2026-04-20_13:45:05 | ERROR   | order_service.py      | L41  | [order] User validated failed - order_id=ORD-A2B3C4D5: HTTPStatusError 401 from user-service /api/v1/auth/me.
+2026-04-20_13:45:05 | WARNING | orders.py             | L60  | [n/a] Auth failed placing order: 401 from user-service.
+2026-04-20_13:45:05 | ERROR   | main.py               | L67  | [g7h8i9j0] POST /api/v1/orders -> HTTP 403 in 5012.8ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-20_15:00:00 | DEBUG   | main.py               | L55  | [h1i2j3k4] Incoming POST /api/v1/refunds from 10.0.1.11
+2026-04-20_15:00:00 | INFO    | refunds.py            | L22  | [refund] Refund request - order_id=ORD-F4A1B2C3 amount=710.45.
+2026-04-20_15:00:00 | DEBUG   | refund_service.py     | L34  | [refund] Processing refund - order_id=ORD-F4A1B2C3 amount=710.45.
+2026-04-20_15:00:00 | INFO    | refund_service.py     | L49  | [refund] Refund type=partial - order_id=ORD-F4A1B2C3 paid=710.45 requested=710.45.
+2026-04-20_15:00:00 | DEBUG   | stripe_gateway.py     | L39  | [stripe] Refunding - pi=pi_3Ptest001 amount_paise=71044 full=False.
+2026-04-20_15:00:01 | INFO    | stripe_gateway.py     | L48  | [stripe] Refund created - refund_id=re_3Ptest001.
+2026-04-20_15:00:01 | INFO    | refund_service.py     | L57  | [refund] Refund recorded - order_id=ORD-F4A1B2C3 gateway_result={'refund_id': 're_3Ptest001', 'status': 'succeeded'}.
+2026-04-20_15:00:01 | INFO    | main.py               | L67  | [h1i2j3k4] POST /api/v1/refunds -> HTTP 200 in 1102.3ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---

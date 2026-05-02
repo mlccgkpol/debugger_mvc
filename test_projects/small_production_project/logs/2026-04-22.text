@@ -1,0 +1,75 @@
+2026-04-22_07:00:00 | INFO    | main.py               | L27  | OrderService starting up - initialising infrastructure.
+2026-04-22_07:00:00 | INFO    | db.py                 | L21  | [db] Pool ready.
+2026-04-22_07:00:00 | INFO    | kafka_client.py       | L32  | [kafka] Producer ready.
+2026-04-22_07:00:00 | INFO    | main.py               | L35  | OrderService ready. Accepting requests.
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-22_07:00:01 | INFO    | main.py               | L27  | NotificationService starting up.
+2026-04-22_07:00:01 | INFO    | redis_client.py       | L36  | [redis] Connection established.
+2026-04-22_07:00:01 | INFO    | kafka_client.py       | L72  | [kafka] Consumer ready - group=biterush.notification-service.orders.
+2026-04-22_07:00:01 | INFO    | kafka_client.py       | L72  | [kafka] Consumer ready - group=biterush.notification-service.payments.
+2026-04-22_07:00:01 | INFO    | main.py               | L35  | NotificationService ready.
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-22_08:00:00 | WARNING | kafka_client.py       | L80  | [kafka] Broker kafka-1.biterush.svc:9092 unreachable. Reconnecting...
+2026-04-22_08:00:03 | INFO    | kafka_client.py       | L72  | [kafka] Consumer ready - group=biterush.notification-service.orders.
+2026-04-22_08:00:03 | WARNING | kafka_client.py       | L80  | [kafka] Duplicate consumer created - group=biterush.notification-service.orders (old task not cancelled).
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-22_08:02:00 | INFO    | kafka_client.py       | L80  | [kafka] Received topic=order.created partition=0 offset=1501 key=ORD-X1Y2Z3A4.
+2026-04-22_08:02:00 | INFO    | order_consumer.py     | L28  | [notif/order-consumer] Processing event - order_id=ORD-X1Y2Z3A4 type=created.
+2026-04-22_08:02:00 | INFO    | notification_service.py | L41  | [notif] Sending notification - user_id=USR-B2C3D4E5 template=order_placed channels=sms_email.
+2026-04-22_08:02:00 | INFO    | notification_service.py | L48  | [notif] SMS sent - user_id=USR-B2C3D4E5 template=order_placed.
+2026-04-22_08:02:00 | INFO    | notification_service.py | L55  | [notif] Email sent - user_id=USR-B2C3D4E5 template=order_placed.
+2026-04-22_08:02:01 | INFO    | kafka_client.py       | L80  | [kafka] Received topic=order.created partition=0 offset=1501 key=ORD-X1Y2Z3A4.
+2026-04-22_08:02:01 | INFO    | order_consumer.py     | L28  | [notif/order-consumer] Processing event - order_id=ORD-X1Y2Z3A4 type=created.
+2026-04-22_08:02:01 | INFO    | notification_service.py | L41  | [notif] Sending notification - user_id=USR-B2C3D4E5 template=order_placed channels=sms_email.
+2026-04-22_08:02:01 | INFO    | notification_service.py | L48  | [notif] SMS sent - user_id=USR-B2C3D4E5 template=order_placed.
+2026-04-22_08:02:01 | INFO    | notification_service.py | L55  | [notif] Email sent - user_id=USR-B2C3D4E5 template=order_placed.
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-22_09:30:00 | DEBUG   | main.py               | L55  | [m7n8o9p0] Incoming POST /api/v1/orders from 10.0.5.77
+2026-04-22_09:30:00 | INFO    | orders.py             | L36  | [n/a] Place order request - cart_id=cart-aa99bb88 method=card.
+2026-04-22_09:30:00 | INFO    | order_service.py      | L41  | [order] User validated - user_id=USR-Q5R6S7T8 order_id=ORD-B4C5D6E7.
+2026-04-22_09:30:00 | DEBUG   | order_service.py      | L49  | [order] Cart loaded - 2 items.
+2026-04-22_09:30:00 | INFO    | order_service.py      | L54  | [order] Inventory confirmed available - order_id=ORD-B4C5D6E7.
+2026-04-22_09:30:00 | DEBUG   | order_service.py      | L59  | [order] Address validated - city=Chennai.
+2026-04-22_09:30:00 | DEBUG   | order_service.py      | L66  | [order] Totals - subtotal=889.00 discount=0 gst=44.45 delivery=29.00 total=962.45.
+2026-04-22_09:30:00 | INFO    | order_service.py      | L76  | [order] Order record created - order_id=ORD-B4C5D6E7 status=pending_payment.
+2026-04-22_09:30:01 | INFO    | order_service.py      | L81  | [order] order.created published - order_id=ORD-B4C5D6E7.
+2026-04-22_09:30:01 | DEBUG   | stripe_gateway.py     | L17  | [stripe] Creating PaymentIntent - order_id=ORD-B4C5D6E7 amount_paise=96245.
+2026-04-22_09:30:04 | ERROR   | order_service.py      | L88  | [order] Initiating payment failed - order_id=ORD-B4C5D6E7: ConnectTimeout connecting to payment-service.
+2026-04-22_09:30:04 | ERROR   | orders.py             | L67  | [n/a] Order placement failed: ConnectTimeout connecting to payment-service.
+2026-04-22_09:30:04 | ERROR   | main.py               | L67  | [m7n8o9p0] POST /api/v1/orders -> HTTP 503 in 4441.1ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-22_10:00:00 | DEBUG   | main.py               | L55  | [q1r2s3t4] Incoming POST /api/v1/auth/register from 10.0.3.21
+2026-04-22_10:00:00 | INFO    | auth.py               | L28  | [auth] Register request - email=rohan.mehta@gmail.com.
+2026-04-22_10:00:01 | INFO    | auth.py               | L32  | [auth] User registered - user_id=USR-C7D8E9F0.
+2026-04-22_10:00:01 | INFO    | main.py               | L67  | [q1r2s3t4] POST /api/v1/auth/register -> HTTP 200 in 412.8ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-22_10:30:00 | WARNING | notification_service.py | L29  | [notif] resolve_user failed attempt=0 order_id=ORD-U5V6W7X8: ConnectError - order-service unreachable.
+2026-04-22_10:30:00 | WARNING | notification_service.py | L29  | [notif] resolve_user failed attempt=1 order_id=ORD-U5V6W7X8: ConnectError - order-service unreachable.
+2026-04-22_10:30:00 | WARNING | notification_service.py | L29  | [notif] resolve_user failed attempt=2 order_id=ORD-U5V6W7X8: ConnectError - order-service unreachable.
+2026-04-22_10:30:00 | ERROR   | notification_service.py | L33  | [notif] Could not resolve user_id for order_id=ORD-U5V6W7X8.
+2026-04-22_10:30:00 | WARNING | notification_service.py | L36  | [notif] Cannot send order_confirmed - user_id is None.
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-22_11:00:00 | DEBUG   | main.py               | L55  | [u9v0w1x2] Incoming POST /api/v1/cart/cart-3c4d5e6f/items from 10.0.4.12
+2026-04-22_11:00:00 | INFO    | cart.py               | L31  | [cart] Add item - cart_id=cart-3c4d5e6f item_id=ITEM-TOOR-DAL-1KG qty=3.
+2026-04-22_11:00:00 | DEBUG   | cart_service.py       | L30  | [cart] add_item - cart_id=cart-3c4d5e6f item_id=ITEM-TOOR-DAL-1KG qty=3.
+2026-04-22_11:00:00 | INFO    | cart_service.py       | L53  | [cart] Item added - cart_id=cart-3c4d5e6f item_id=ITEM-TOOR-DAL-1KG total_items=1.
+2026-04-22_11:00:00 | INFO    | main.py               | L67  | [u9v0w1x2] POST /api/v1/cart/cart-3c4d5e6f/items -> HTTP 200 in 18.9ms
+2026-04-22_11:00:00 | DEBUG   | main.py               | L55  | [y3z4a5b6] Incoming POST /api/v1/cart/cart-3c4d5e6f/items from 10.0.4.13
+2026-04-22_11:00:00 | INFO    | cart.py               | L31  | [cart] Add item - cart_id=cart-3c4d5e6f item_id=ITEM-TOOR-DAL-1KG qty=2.
+2026-04-22_11:00:00 | INFO    | cart_service.py       | L53  | [cart] Item added - cart_id=cart-3c4d5e6f item_id=ITEM-TOOR-DAL-1KG total_items=1.
+2026-04-22_11:00:00 | INFO    | main.py               | L67  | [y3z4a5b6] POST /api/v1/cart/cart-3c4d5e6f/items -> HTTP 200 in 21.3ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-22_14:00:00 | DEBUG   | main.py               | L55  | [c7d8e9f0] Incoming POST /api/v1/auth/login from 10.0.8.44
+2026-04-22_14:00:00 | INFO    | auth.py               | L44  | [auth] Login request - email=amit.patel@hotmail.com.
+2026-04-22_14:00:00 | WARNING | auth_service.py       | L46  | [auth_svc] Login failed - email=amit.patel@hotmail.com: Invalid email or password.
+2026-04-22_14:00:00 | ERROR   | main.py               | L67  | [c7d8e9f0] POST /api/v1/auth/login -> HTTP 401 in 61.2ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-22_16:00:00 | DEBUG   | main.py               | L55  | [g1h2i3j4] Incoming POST /api/v1/refunds from 10.0.1.11
+2026-04-22_16:00:00 | INFO    | refunds.py            | L22  | [refund] Refund request - order_id=ORD-B4C5D6E7 amount=199.90.
+2026-04-22_16:00:00 | DEBUG   | refund_service.py     | L34  | [refund] Processing refund - order_id=ORD-B4C5D6E7 amount=199.90.
+2026-04-22_16:00:00 | INFO    | refund_service.py     | L49  | [refund] Refund type=partial - order_id=ORD-B4C5D6E7 paid=199.90 requested=199.90.
+2026-04-22_16:00:00 | DEBUG   | stripe_gateway.py     | L39  | [stripe] Refunding - pi=pi_3Ptest003 amount_paise=19989 full=False.
+2026-04-22_16:00:01 | INFO    | stripe_gateway.py     | L48  | [stripe] Refund created - refund_id=re_3Ptest003.
+2026-04-22_16:00:01 | INFO    | refund_service.py     | L57  | [refund] Refund recorded - order_id=ORD-B4C5D6E7 gateway_result={'refund_id': 're_3Ptest003', 'status': 'succeeded'}.
+2026-04-22_16:00:01 | INFO    | main.py               | L67  | [g1h2i3j4] POST /api/v1/refunds -> HTTP 200 in 1089.7ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---

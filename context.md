@@ -21,7 +21,7 @@ There are three moving pieces:
    - fetches tool definitions from both MCP servers
    - sends a strict prompt to Ollama
    - executes returned tool calls
-   - accumulates raw tool outputs into session history
+   - accumulates tool outputs into session history and condenses older history when it grows too large
 
 2. `repo_server.py`
    - exposes codebase inspection tools
@@ -30,6 +30,11 @@ There are three moving pieces:
 3. `log_server.py`
    - exposes log search
    - assumes logs live in `./logs` under its current working directory
+
+4. `history_summarizer.py`
+   - uses `qwen2.5-coder:7b` through Ollama
+   - summarizes only the middle history
+   - preserves the last 3 raw iterations for the main model
 
 The target code being debugged is usually not the `debugger_mvc` repo itself. It is typically one of the generated projects in `test_projects/`.
 
@@ -81,12 +86,29 @@ Notable behavior:
 - `MAX_STALLS = 3`
 - default Ollama endpoint is `http://localhost:11434/api/chat`
 - default model is `gemma4:e4b`
+- a separate summarizer model is used for history compression once a configurable token threshold is crossed
 - only the first tool call from a model response is executed per turn
-- full raw tool history is replayed into the model after each step
+- the original prompt stays intact, older middle history is summarized, and the last 3 raw iterations are kept verbatim
 
 Implication:
 
-- the system is intentionally simple but context growth can become a bottleneck
+- the system stays simple, but long sessions now trade some raw fidelity for better context efficiency
+
+### `history_summarizer.py`
+
+Responsibilities:
+
+- estimate history size without an external tokenizer dependency
+- decide when summarization should start
+- incrementally fold older tool results into a running summary
+- keep the main debugger model focused on condensed history plus fresh raw evidence
+
+Notable behavior:
+
+- defaults to `qwen2.5-coder:7b`
+- only summarizes history older than the last 3 raw iterations
+- is triggered by an environment-configurable estimated token threshold
+- if summarization fails, the client falls back to unsummarized history instead of losing context
 
 ### `repo_server.py`
 

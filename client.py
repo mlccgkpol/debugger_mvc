@@ -111,13 +111,16 @@ import asyncio
 import json
 import hashlib
 import httpx
-import sys
+import os
 from datetime import datetime
 from typing import Dict, List, Any
 import traceback
 
 from mcp.client.session import ClientSession
 from mcp.client.sse import sse_client
+
+from debugger_logger import DebuggerLogger
+from history_summarizer import HistorySummarizer
 
 class OllamaMCPClient:
     """
@@ -126,13 +129,30 @@ class OllamaMCPClient:
     """
     MAX_TURNS = 15
     MAX_STALLS = 3
+    RECENT_HISTORY_WINDOW = 2
+    EXO_URL = "http://localhost:52415/ollama/api/chat"
     OLLAMA_URL = "http://localhost:11434/api/chat"
+    DEFAULT_URL = OLLAMA_URL
+    DEFAULT_MODEL = "gemma4:e4b"
 
-    def __init__(self, model: str = "gemma4:e4b"):
+    def __init__(self, model: str = DEFAULT_MODEL):
         self.model = model
         self.call_history = set()
         self.tool_mapping = {}
         self.all_tools = []
+        self.logger = DebuggerLogger()
+        self.history_summarizer = HistorySummarizer(
+            ollama_url=self.DEFAULT_URL,
+            model=os.getenv(
+                "DEBUGGER_HISTORY_SUMMARY_MODEL",
+                self.DEFAULT_MODEL,
+            ),
+            trigger_tokens=int(
+                os.getenv("DEBUGGER_HISTORY_SUMMARY_TRIGGER_TOKENS", "3000")
+            ),
+            timeout=float(os.getenv("DEBUGGER_HISTORY_SUMMARY_TIMEOUT", "300.0")),
+            logger=self.logger,
+        )
 
     async def run(self, repo_url: str, log_url: str):
         """Main entry point for the debugging session."""
@@ -177,6 +197,8 @@ class OllamaMCPClient:
         
         # This list will store every tool result and model thought for the entire session
         raw_history_log = []
+        summarized_history = ""
+        summarized_until = 0
 
         # Turn 0: Initial setup
         messages = [
@@ -231,18 +253,55 @@ class OllamaMCPClient:
                 # Update the raw history log with the tool's output
                 raw_history_log.append(f"--- TOOL CALL: {t_name} ---\nARGS: {t_args}\nRESULT:\n{result}\n")
                 
-                # D. Updated Context Strategy (Full Raw History)
-                # We concatenate all past results so the model sees everything at once.
-                history_blob = "\n".join(raw_history_log)
+                # D. Updated Context Strategy (Condensed Middle History + Recent Raw History)
+                if self.history_summarizer.should_summarize(
+                    raw_history_log,
+                    preserve_recent=self.RECENT_HISTORY_WINDOW,
+                ):
+                    middle_cutoff = len(raw_history_log) - self.RECENT_HISTORY_WINDOW
+                    pending_summary_entries = raw_history_log[summarized_until:middle_cutoff]
+
+                    if pending_summary_entries:
+                        try:
+                            summarized_history = await self.history_summarizer.summarize(
+                                existing_summary=summarized_history,
+                                new_entries=pending_summary_entries,
+                            )
+                            summarized_until = middle_cutoff
+                            self._log(
+                                "SUMMARY",
+                                (
+                                    "Condensed history to "
+                                    f"{self.history_summarizer.estimate_tokens(summarized_history)} "
+                                    "estimated tokens."
+                                ),
+                            )
+                        except Exception as exc:
+                            self._log(
+                                "SUMMARY",
+                                f"Skipped summarization: {type(exc).__name__} - {exc}",
+                            )
+
+                history_blob = self._build_history_context(
+                    raw_history_log=raw_history_log,
+                    summarized_history=summarized_history,
+                    summarized_until=summarized_until,
+                )
                 
                 messages = [
                     {"role": "system", "content": prompt_builder.system},
                     {"role": "user", "content": prompt_builder.initial(user_message)},
-                    {"role": "user", "content": f"FULL SESSION HISTORY:\n{history_blob}"},
-                    {"role": "user", "content": "Based on the FULL HISTORY above, what is the next step?"}
+                    {"role": "user", "content": f"HISTORY CONTEXT:\n{history_blob}"},
+                    {"role": "user", "content": "Based on the HISTORY CONTEXT above, what is the next step?"}
                 ]
                 
-                self._log("HISTORY", f"History size: {len(history_blob)} chars.")
+                self._log(
+                    "HISTORY",
+                    (
+                        f"History size: {len(history_blob)} chars / "
+                        f"{self.history_summarizer.estimate_tokens(history_blob)} estimated tokens."
+                    ),
+                )
             else:
                 self._log('INVALID',f"Tool {t_name} doces not exist")
                 messages.append({"role": "user", "content": prompt_builder.tool_correction(t_name)})
@@ -261,9 +320,15 @@ class OllamaMCPClient:
         }
         try:
             # Use a longer timeout for Turn 5+ as the prompt is now very large
+            self.logger.model_request(
+                source="client",
+                model=self.model,
+                messages=messages,
+                tools_count=len(self.all_tools),
+            )
             async with httpx.AsyncClient() as client:
                 resp = await client.post(
-                    self.OLLAMA_URL, 
+                    self.DEFAULT_URL, 
                     json=payload, 
                     timeout=300.0  # Increased to 90s
                 )
@@ -271,8 +336,15 @@ class OllamaMCPClient:
                 if resp.status_code != 200:
                     self._log("ERR", f"Ollama Status {resp.status_code}: {resp.text}")
                     return {}
-                    
-                return resp.json().get("message")
+
+                message = resp.json().get("message", {})
+                self.logger.model_response(
+                    source="client",
+                    model=self.model,
+                    content=message.get("content", ""),
+                    tool_calls=message.get("tool_calls") or [],
+                )
+                return message
 
         except httpx.TimeoutException:
             self._log("ERR", "Ollama timed out. The context might be too heavy for your GPU/CPU.")
@@ -282,17 +354,19 @@ class OllamaMCPClient:
             return {}
 
     async def _execute_tool(self, session: ClientSession, name: str, args: dict) -> str:
-        self._log('TOOL', f'CALLING: {name} || ARGS: {args}')
+        self.logger.tool_request(name, args)
         try:
             result = await session.call_tool(name, args)
             raw_text = "\n".join(item.text for item in result.content if hasattr(item, "text"))
             
             # Minimalist format: Clear name and a simple separator
             formated_result = f"\nSOURCE [{name.upper()}]:\n{raw_text}\n---\n"
-            self._log('RESULT', formated_result)
+            self.logger.tool_response(formated_result)
             return formated_result
         except Exception as e:
-            return f"\nSOURCE [{name.upper()}] ERROR:\n{str(e)}\n---\n"
+            error_result = f"\nSOURCE [{name.upper()}] ERROR:\n{str(e)}\n---\n"
+            self.logger.tool_response(error_result)
+            return error_result
 
     def _format_tools(self) -> List[Dict]:
         """Formats MCP tools for the Ollama tool-call schema."""
@@ -308,12 +382,37 @@ class OllamaMCPClient:
         ]
 
     def _log(self, tag: str, msg: str):
-        ts = datetime.now().strftime("%H:%M:%S")
-        print(f"[{ts}] {tag:<6} | {msg}")
+        self.logger.log(tag, msg)
+
+    def _build_history_context(
+        self,
+        raw_history_log: List[str],
+        summarized_history: str,
+        summarized_until: int,
+    ) -> str:
+        if not summarized_history:
+            return "\n".join(raw_history_log)
+
+        recent_history = "\n".join(raw_history_log[summarized_until:])
+        parts = [
+            "SUMMARIZED MIDDLE HISTORY:",
+            summarized_history,
+        ]
+
+        if recent_history:
+            parts.extend(
+                [
+                    "",
+                    "LAST 3 RAW ITERATIONS (MOST RECENT LAST):",
+                    recent_history,
+                ]
+            )
+
+        return "\n".join(parts)
 
 if __name__ == "__main__":
     # Ensure MCP servers are running on these ports
-    client = OllamaMCPClient(model="gemma4:e4b")
+    client = OllamaMCPClient()
     asyncio.run(client.run(
         repo_url="http://localhost:8002/sse",
         log_url="http://localhost:8001/sse"

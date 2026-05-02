@@ -1,0 +1,78 @@
+2026-04-21_07:00:00 | INFO    | main.py               | L27  | OrderService starting up - initialising infrastructure.
+2026-04-21_07:00:01 | INFO    | db.py                 | L21  | [db] Pool ready.
+2026-04-21_07:00:01 | INFO    | redis_client.py       | L36  | [redis] Connection established.
+2026-04-21_07:00:01 | INFO    | kafka_client.py       | L32  | [kafka] Producer ready.
+2026-04-21_07:00:01 | INFO    | main.py               | L35  | OrderService ready. Accepting requests.
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-21_09:00:00 | DEBUG   | main.py               | L55  | [j5k6l7m8] Incoming POST /api/v1/orders from 10.0.4.55
+2026-04-21_09:00:00 | INFO    | orders.py             | L36  | [n/a] Place order request - cart_id=cart-bb22dd44 method=card.
+2026-04-21_09:00:00 | DEBUG   | order_service.py      | L35  | [order] New placement attempt - order_id=ORD-E3F4A5B6 cart_id=cart-bb22dd44.
+2026-04-21_09:00:00 | INFO    | order_service.py      | L41  | [order] User validated - user_id=USR-F9G0H1I2 order_id=ORD-E3F4A5B6.
+2026-04-21_09:00:00 | DEBUG   | order_service.py      | L49  | [order] Cart loaded - 1 items.
+2026-04-21_09:00:00 | INFO    | order_service.py      | L54  | [order] Inventory confirmed available - order_id=ORD-E3F4A5B6.
+2026-04-21_09:00:00 | DEBUG   | order_service.py      | L57  | [order] Validating delivery address - address_id=ADDR-044.
+2026-04-21_09:00:00 | DEBUG   | order_service.py      | L59  | [order] Address validated - city=Bangalore.
+2026-04-21_09:00:00 | INFO    | order_service.py      | L62  | [order] Promo applied - code=FIRST10 discount=39.90.
+2026-04-21_09:00:00 | DEBUG   | order_service.py      | L66  | [order] Totals - subtotal=399.00 discount=39.90 gst=19.95 delivery=29.00 total=408.05.
+2026-04-21_09:00:00 | INFO    | order_service.py      | L76  | [order] Order record created - order_id=ORD-E3F4A5B6 status=pending_payment.
+2026-04-21_09:00:00 | INFO    | order_service.py      | L81  | [order] order.created published - order_id=ORD-E3F4A5B6.
+2026-04-21_09:00:00 | DEBUG   | stripe_gateway.py     | L17  | [stripe] Creating PaymentIntent - order_id=ORD-E3F4A5B6 amount_paise=40805.
+2026-04-21_09:00:01 | INFO    | stripe_gateway.py     | L29  | [stripe] PaymentIntent created - id=pi_3Ptest002 order_id=ORD-E3F4A5B6.
+2026-04-21_09:00:01 | INFO    | order_service.py      | L91  | [order] Order status updated - order_id=ORD-E3F4A5B6 status=awaiting_payment.
+2026-04-21_09:00:01 | INFO    | orders.py             | L55  | [n/a] Order placed - order_id=ORD-E3F4A5B6 total=408.05.
+2026-04-21_09:00:01 | INFO    | main.py               | L67  | [j5k6l7m8] POST /api/v1/orders -> HTTP 200 in 1189.3ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-21_09:00:14 | DEBUG   | main.py               | L55  | [n3o4p5q6] Incoming POST /api/v1/payments/webhook/stripe from 54.187.174.169
+2026-04-21_09:00:14 | INFO    | payments.py           | L52  | [webhook] Stripe webhook received - sig_present=True.
+2026-04-21_09:00:14 | INFO    | payment_service.py    | L51  | [payment] Stripe webhook - event_type=payment_intent.succeeded event_id=evt_3Ptest002.
+2026-04-21_09:00:14 | INFO    | payment_service.py    | L61  | [payment] Payment completed via webhook - order_id=ORD-E3F4A5B6 amount=408.05.
+2026-04-21_09:00:14 | DEBUG   | kafka_client.py       | L50  | [kafka] Published to topic=payment.completed key=ORD-E3F4A5B6.
+2026-04-21_09:00:14 | INFO    | main.py               | L67  | [n3o4p5q6] POST /api/v1/payments/webhook/stripe -> HTTP 200 in 91.2ms
+2026-04-21_09:00:14 | DEBUG   | main.py               | L55  | [r7s8t9u0] Incoming POST /api/v1/payments/webhook/stripe from 54.187.174.169
+2026-04-21_09:00:14 | INFO    | payments.py           | L52  | [webhook] Stripe webhook received - sig_present=True.
+2026-04-21_09:00:14 | INFO    | payment_service.py    | L51  | [payment] Stripe webhook - event_type=payment_intent.succeeded event_id=evt_3Ptest002.
+2026-04-21_09:00:14 | INFO    | payment_service.py    | L61  | [payment] Payment completed via webhook - order_id=ORD-E3F4A5B6 amount=408.05.
+2026-04-21_09:00:14 | DEBUG   | kafka_client.py       | L50  | [kafka] Published to topic=payment.completed key=ORD-E3F4A5B6.
+2026-04-21_09:00:14 | INFO    | main.py               | L67  | [r7s8t9u0] POST /api/v1/payments/webhook/stripe -> HTTP 200 in 87.6ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-21_09:00:15 | INFO    | kafka_client.py       | L80  | [kafka] Received topic=payment.completed partition=1 offset=883 key=ORD-E3F4A5B6.
+2026-04-21_09:00:15 | INFO    | payment_consumer.py   | L26  | [order/payment-consumer] Received payment event - order_id=ORD-E3F4A5B6 status=completed.
+2026-04-21_09:00:15 | INFO    | payment_consumer.py   | L31  | [order/payment-consumer] Order confirmed - order_id=ORD-E3F4A5B6.
+2026-04-21_09:00:15 | INFO    | kafka_client.py       | L80  | [kafka] Received topic=payment.completed partition=1 offset=884 key=ORD-E3F4A5B6.
+2026-04-21_09:00:15 | INFO    | payment_consumer.py   | L26  | [order/payment-consumer] Received payment event - order_id=ORD-E3F4A5B6 status=completed.
+2026-04-21_09:00:15 | INFO    | payment_consumer.py   | L31  | [order/payment-consumer] Order confirmed - order_id=ORD-E3F4A5B6.
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-21_10:30:00 | DEBUG   | main.py               | L55  | [v1w2x3y4] Incoming POST /api/v1/stock/reserve from 10.0.6.99
+2026-04-21_10:30:00 | INFO    | stock.py              | L32  | [stock] Reserve request - order_id=ORD-G5H6I7J8 items=1.
+2026-04-21_10:30:00 | INFO    | reservation_service.py | L24  | [reservation] Reserving stock - order_id=ORD-G5H6I7J8 items=1.
+2026-04-21_10:30:00 | DEBUG   | reservation_service.py | L35  | [reservation] Advisory lock acquired - order_id=ORD-G5H6I7J8.
+2026-04-21_10:30:00 | DEBUG   | reservation_service.py | L35  | [reservation] Advisory lock acquired - order_id=ORD-K9L0M1N2.
+2026-04-21_10:30:00 | DEBUG   | reservation_service.py | L47  | [reservation] Decremented - item_id=ITEM-AMUL-BUTTER-500G qty=2 remaining=2.
+2026-04-21_10:30:00 | DEBUG   | reservation_service.py | L47  | [reservation] Decremented - item_id=ITEM-AMUL-BUTTER-500G qty=2 remaining=0.
+2026-04-21_10:30:00 | INFO    | reservation_service.py | L68  | [reservation] Stock reserved - order_id=ORD-G5H6I7J8 items=[{'item_id': 'ITEM-AMUL-BUTTER-500G', 'quantity': 2}].
+2026-04-21_10:30:00 | INFO    | reservation_service.py | L68  | [reservation] Stock reserved - order_id=ORD-K9L0M1N2 items=[{'item_id': 'ITEM-AMUL-BUTTER-500G', 'quantity': 2}].
+2026-04-21_10:30:01 | INFO    | main.py               | L67  | [v1w2x3y4] POST /api/v1/stock/reserve -> HTTP 200 in 312.4ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-21_11:15:00 | DEBUG   | main.py               | L55  | [z5a6b7c8] Incoming GET /api/v1/addresses/42 from 10.0.4.12
+2026-04-21_11:15:00 | DEBUG   | addresses.py          | L38  | [address] Fetched address - address_id=42.
+2026-04-21_11:15:00 | INFO    | main.py               | L67  | [z5a6b7c8] GET /api/v1/addresses/42 -> HTTP 200 in 14.7ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-21_13:00:00 | DEBUG   | main.py               | L55  | [d9e0f1g2] Incoming POST /api/v1/orders from 10.0.9.14
+2026-04-21_13:00:00 | INFO    | orders.py             | L36  | [n/a] Place order request - cart_id=cart-ff11ee22 method=cod.
+2026-04-21_13:00:00 | DEBUG   | order_service.py      | L35  | [order] New placement attempt - order_id=ORD-P7Q8R9S0 cart_id=cart-ff11ee22.
+2026-04-21_13:00:00 | INFO    | order_service.py      | L41  | [order] User validated - user_id=USR-T1U2V3W4 order_id=ORD-P7Q8R9S0.
+2026-04-21_13:00:00 | DEBUG   | order_service.py      | L49  | [order] Cart loaded - 4 items.
+2026-04-21_13:00:00 | INFO    | order_service.py      | L54  | [order] Inventory confirmed available - order_id=ORD-P7Q8R9S0.
+2026-04-21_13:00:00 | DEBUG   | order_service.py      | L59  | [order] Address validated - city=Pune.
+2026-04-21_13:00:00 | DEBUG   | order_service.py      | L66  | [order] Totals - subtotal=1245.00 discount=0 gst=62.25 delivery=29.00 total=1336.25.
+2026-04-21_13:00:00 | INFO    | order_service.py      | L76  | [order] Order record created - order_id=ORD-P7Q8R9S0 status=pending_payment.
+2026-04-21_13:00:00 | INFO    | order_service.py      | L91  | [order] Order status updated - order_id=ORD-P7Q8R9S0 status=awaiting_payment.
+2026-04-21_13:00:00 | INFO    | orders.py             | L55  | [n/a] Order placed - order_id=ORD-P7Q8R9S0 total=1336.25.
+2026-04-21_13:00:00 | INFO    | main.py               | L67  | [d9e0f1g2] POST /api/v1/orders -> HTTP 200 in 988.1ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-21_14:30:00 | DEBUG   | main.py               | L55  | [h3i4j5k6] Incoming POST /api/v1/orders/ORD-P7Q8R9S0/cancel from 10.0.9.14
+2026-04-21_14:30:00 | INFO    | orders.py             | L79  | [n/a] Cancel order request - order_id=ORD-P7Q8R9S0.
+2026-04-21_14:30:00 | INFO    | order_service.py      | L100 | [order] Order cancelled - order_id=ORD-P7Q8R9S0.
+2026-04-21_14:30:00 | DEBUG   | kafka_client.py       | L50  | [kafka] Published to topic=order.cancelled key=ORD-P7Q8R9S0.
+2026-04-21_14:30:00 | INFO    | main.py               | L67  | [h3i4j5k6] POST /api/v1/orders/ORD-P7Q8R9S0/cancel -> HTTP 200 in 77.2ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---

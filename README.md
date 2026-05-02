@@ -8,6 +8,7 @@ The repository has two main parts:
    - `client.py`: interactive client that talks to Ollama and MCP servers.
    - `repo_server.py`: repository inspection MCP server.
    - `log_server.py`: log search MCP server.
+   - `history_summarizer.py`: condenses older tool history before it is sent back to the main model
 2. Synthetic target projects under `test_projects/` used to exercise the debugger against known failure scenarios.
 
 ## How It Works
@@ -30,6 +31,7 @@ The model is prompted to work in a strict order:
 - `client.py`: prompt strategy, tool-call loop, loop prevention, Ollama API calls
 - `repo_server.py`: `get_repository_structure`, `read_file`, `search_text_in_repository`
 - `log_server.py`: `search_log`
+- `history_summarizer.py`: rolling middle-history summarization via Ollama
 - `requirements.txt`: runtime dependencies
 - `test_projects/`: generated fixture projects and logs
 
@@ -64,6 +66,7 @@ If both servers are started from the repo root, the debugger will inspect the de
 
 - Ollama is available at `http://localhost:11434`
 - the client defaults to model `gemma4:e4b`
+- the history summarizer defaults to model `qwen2.5-coder:7b`
 - the MCP servers are expected on:
   - `http://localhost:8002/sse` for the repo server
   - `http://localhost:8001/sse` for the log server
@@ -71,6 +74,7 @@ If both servers are started from the repo root, the debugger will inspect the de
 ## Known Design Characteristics
 
 - The client currently rebuilds the prompt from full raw tool history on each turn, so context size grows over time.
+- Older tool history is now condensed once an estimated token threshold is crossed, while the last 3 raw iterations stay verbatim.
 - The client executes only the first tool call returned by the model on each turn.
 - The prompt strategy is intentionally strict and optimized for small local models.
 
