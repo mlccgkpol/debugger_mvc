@@ -1,0 +1,77 @@
+2026-04-15_07:00:00 | INFO    | main.py               | L27  | PulseMetrics starting up - initialising infrastructure.
+2026-04-15_07:00:00 | INFO    | db.py                 | L39  | [db] Opening asyncpg pool - dsn='postgresql://pulse_rw@ts-db-primary.pulsemetrics.svc.cluster.local:5432/pulsemetrics' pool_size=5.
+2026-04-15_07:00:01 | INFO    | db.py                 | L47  | [db] asyncpg pool ready.
+2026-04-15_07:00:01 | INFO    | cache.py              | L35  | [cache] Connecting to Redis - redis-primary.pulsemetrics.svc.cluster.local:6379/0.
+2026-04-15_07:00:01 | INFO    | cache.py              | L45  | [cache] Redis connection established.
+2026-04-15_07:00:01 | INFO    | telemetry.py          | L37  | [telemetry] Initialising relay client - endpoint=https://telemetry-gateway.pulsemetrics.internal/v1/streams/pulse-prod.
+2026-04-15_07:00:01 | INFO    | telemetry.py          | L47  | [telemetry] Relay client ready.
+2026-04-15_07:00:01 | INFO    | main.py               | L31  | Infrastructure ready. Accepting requests.
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-15_08:05:30 | DEBUG   | main.py               | L55  | [k7l8m9n0] Incoming GET /api/v2/query/summary/host-prod-03 from 10.0.5.21
+2026-04-15_08:05:30 | INFO    | query.py              | L29  | Summary query - source='host-prod-03' metric='net_rx_bytes' window=1800s.
+2026-04-15_08:05:30 | DEBUG   | query_service.py      | L28  | [query] Summary requested - source=host-prod-03 metric=net_rx_bytes window=1800s tenant=default.
+2026-04-15_08:05:30 | DEBUG   | query_service.py      | L33  | [query] Checking Redis - key=summary:default:host-prod-03:net_rx_bytes:1800.
+2026-04-15_08:05:30 | DEBUG   | cache.py              | L52  | [cache] GET summary:default:host-prod-03:net_rx_bytes:1800.
+2026-04-15_08:05:30 | WARNING | cache.py              | L64  | [cache] Refresh lock present for key=summary:default:host-prod-03:net_rx_bytes:1800. Waiting up to 1.5s for a hydrated value.
+2026-04-15_08:05:31 | ERROR   | query_service.py      | L37  | [query] Cache read failed - key=summary:default:host-prod-03:net_rx_bytes:1800: Cache GET timed out after 1.5s waiting for refresh lock on key='summary:default:host-prod-03:net_rx_bytes:1800'.
+2026-04-15_08:05:31 | ERROR   | query.py              | L41  | Summary timed out - source='host-prod-03': Cache GET timed out after 1.5s waiting for refresh lock on key='summary:default:host-prod-03:net_rx_bytes:1800'.
+2026-04-15_08:05:31 | ERROR   | main.py               | L67  | [k7l8m9n0] GET /api/v2/query/summary/host-prod-03 -> HTTP 503 in 1521.8ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-15_09:12:44 | DEBUG   | main.py               | L55  | [p1q2r3s4] Incoming POST /api/v2/ingest/event from 10.0.1.77
+2026-04-15_09:12:44 | INFO    | ingest.py             | L34  | [n/a] Ingest request for metric='latency_p99' source='api-gateway'.
+2026-04-15_09:12:44 | DEBUG   | auth_service.py       | L46  | Validating token (length=0).
+2026-04-15_09:12:44 | WARNING | auth_service.py       | L50  | Rejecting token - expected 3 JWT segments, got 1.
+2026-04-15_09:12:44 | WARNING | ingest.py             | L42  | [n/a] Auth rejected for source='api-gateway': Malformed token: expected 3 parts, got 1. Ensure the Authorization header is 'Bearer <token>'.
+2026-04-15_09:12:44 | ERROR   | main.py               | L67  | [p1q2r3s4] POST /api/v2/ingest/event -> HTTP 401 in 2.8ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-15_10:00:00 | DEBUG   | main.py               | L55  | [t5u6v7w8] Incoming GET /api/v2/query/summary/boiler-room-a17 from 10.0.3.55
+2026-04-15_10:00:00 | INFO    | query.py              | L29  | Summary query - source='boiler-room-a17' metric='temperature_c' window=3600s.
+2026-04-15_10:00:00 | DEBUG   | query_service.py      | L28  | [query] Summary requested - source=boiler-room-a17 metric=temperature_c window=3600s tenant=default.
+2026-04-15_10:00:00 | DEBUG   | query_service.py      | L33  | [query] Checking Redis - key=summary:default:boiler-room-a17:temperature_c:3600.
+2026-04-15_10:00:00 | DEBUG   | cache.py              | L52  | [cache] GET summary:default:boiler-room-a17:temperature_c:3600.
+2026-04-15_10:00:00 | DEBUG   | cache.py              | L60  | [cache] GET summary:default:boiler-room-a17:temperature_c:3600 -> MISS.
+2026-04-15_10:00:00 | INFO    | query_service.py      | L42  | [query] Cache miss - falling back to TimescaleDB source=boiler-room-a17 metric=temperature_c.
+2026-04-15_10:00:00 | DEBUG   | query_service.py      | L47  | [query] Querying metric_repo - source=boiler-room-a17 window=3600s.
+2026-04-15_10:00:00 | DEBUG   | metric_repo.py        | L69  | [metric_repo] read_window - source=boiler-room-a17 metric=temperature_c window=3600s table=metrics_default.
+2026-04-15_10:00:00 | DEBUG   | db.py                 | L58  | [db] acquire() called - checked_out=0/5.
+2026-04-15_10:00:00 | DEBUG   | db.py                 | L73  | [db] Connection acquired - checked_out=1.
+2026-04-15_10:00:00 | WARNING | metric_repo.py        | L83  | [metric_repo] Statement timeout reading source=boiler-room-a17 metric=temperature_c window=3600s.
+2026-04-15_10:00:00 | DEBUG   | db.py                 | L80  | [db] Connection released - checked_out=0.
+2026-04-15_10:00:00 | DEBUG   | query_service.py      | L51  | [query] DB returned None rows.
+2026-04-15_10:00:00 | DEBUG   | query_service.py      | L55  | [query] Beginning aggregation - source=boiler-room-a17.
+2026-04-15_10:00:00 | ERROR   | query_service.py      | L59  | [query] Aggregation failed - source=boiler-room-a17: 'NoneType' object has no attribute '__iter__'
+2026-04-15_10:00:00 | ERROR   | query.py              | L44  | Aggregation error - source='boiler-room-a17': 'NoneType' object has no attribute '__iter__'
+2026-04-15_10:00:00 | ERROR   | main.py               | L67  | [t5u6v7w8] GET /api/v2/query/summary/boiler-room-a17 -> HTTP 500 in 31.7ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-15_11:30:00 | DEBUG   | main.py               | L55  | [x9y0z1a2] Incoming POST /api/v2/ingest/event from 10.0.1.44
+2026-04-15_11:30:00 | INFO    | ingest.py             | L34  | [n/a] Ingest request for metric='cpu_usage' source='host-prod-05'.
+2026-04-15_11:30:00 | DEBUG   | auth_service.py       | L46  | Validating token (length=172).
+2026-04-15_11:30:00 | DEBUG   | auth_service.py       | L85  | Token valid - tenant=acme sub=pipeline-agent.
+2026-04-15_11:30:00 | INFO    | ingest.py             | L40  | [n/a] Auth OK - tenant='acme'.
+2026-04-15_11:30:00 | DEBUG   | ingest_service.py     | L25  | [ingest] Entering pipeline - event_id=9e1f234a5b67 tenant=acme metric=cpu_usage.
+2026-04-15_11:30:00 | DEBUG   | ingest_service.py     | L31  | [ingest] Schema validation passed - event_id=9e1f234a5b67.
+2026-04-15_11:30:00 | DEBUG   | ingest_service.py     | L33  | [ingest] Resolving source_id=host-prod-05.
+2026-04-15_11:30:00 | DEBUG   | source_repo.py        | L19  | [source_repo] Fetching config - source_id=host-prod-05 tenant=acme.
+2026-04-15_11:30:00 | DEBUG   | db.py                 | L58  | [db] acquire() called - checked_out=0/5.
+2026-04-15_11:30:00 | DEBUG   | db.py                 | L73  | [db] Connection acquired - checked_out=1.
+2026-04-15_11:30:00 | DEBUG   | db.py                 | L80  | [db] Connection released - checked_out=0.
+2026-04-15_11:30:00 | DEBUG   | ingest_service.py     | L38  | [ingest] Source resolved - retention=30d.
+2026-04-15_11:30:00 | INFO    | ingest_service.py     | L42  | [ingest] Writing metric to TimescaleDB - event_id=9e1f234a5b67 source=host-prod-05.
+2026-04-15_11:30:00 | DEBUG   | metric_repo.py        | L22  | [metric_repo] Acquiring DB connection - table=metrics_acme metric=cpu_usage.
+2026-04-15_11:30:00 | DEBUG   | db.py                 | L58  | [db] acquire() called - checked_out=5/5.
+2026-04-15_11:30:02 | WARNING | db.py                 | L65  | [db] Pool acquire timed out after 2.0s (checked_out=5/5).
+2026-04-15_11:30:02 | ERROR   | metric_repo.py        | L29  | [metric_repo] Failed to acquire DB connection - table=metrics_acme: Timed out after 2.0s waiting for a database connection from a pool of 5.
+2026-04-15_11:30:02 | ERROR   | ingest_service.py     | L47  | [ingest] DB write failed for event_id=9e1f234a5b67: Timed out after 2.0s waiting for a database connection from a pool of 5.
+2026-04-15_11:30:02 | ERROR   | ingest.py             | L51  | [n/a] Ingest pipeline failed for metric='cpu_usage': Timed out after 2.0s waiting for a database connection from a pool of 5.
+2026-04-15_11:30:02 | ERROR   | main.py               | L67  | [x9y0z1a2] POST /api/v2/ingest/event -> HTTP 500 in 2038.1ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-15_13:15:00 | DEBUG   | main.py               | L55  | [b3c4d5e6] Incoming GET /api/v2/query/summary/host-prod-07 from 10.0.5.21
+2026-04-15_13:15:00 | INFO    | query.py              | L29  | Summary query - source='host-prod-07' metric='net_tx_bytes' window=1800s.
+2026-04-15_13:15:00 | DEBUG   | query_service.py      | L28  | [query] Summary requested - source=host-prod-07 metric=net_tx_bytes window=1800s tenant=default.
+2026-04-15_13:15:00 | DEBUG   | query_service.py      | L33  | [query] Checking Redis - key=summary:default:host-prod-07:net_tx_bytes:1800.
+2026-04-15_13:15:00 | DEBUG   | cache.py              | L52  | [cache] GET summary:default:host-prod-07:net_tx_bytes:1800.
+2026-04-15_13:15:00 | WARNING | cache.py              | L64  | [cache] Refresh lock present for key=summary:default:host-prod-07:net_tx_bytes:1800. Waiting up to 1.5s for a hydrated value.
+2026-04-15_13:15:01 | ERROR   | query_service.py      | L37  | [query] Cache read failed - key=summary:default:host-prod-07:net_tx_bytes:1800: Cache GET timed out after 1.5s waiting for refresh lock on key='summary:default:host-prod-07:net_tx_bytes:1800'.
+2026-04-15_13:15:01 | ERROR   | query.py              | L41  | Summary timed out - source='host-prod-07': Cache GET timed out after 1.5s waiting for refresh lock on key='summary:default:host-prod-07:net_tx_bytes:1800'.
+2026-04-15_13:15:01 | ERROR   | main.py               | L67  | [b3c4d5e6] GET /api/v2/query/summary/host-prod-07 -> HTTP 503 in 1519.3ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---

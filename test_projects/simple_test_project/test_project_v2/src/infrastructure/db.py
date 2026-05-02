@@ -1,19 +1,22 @@
 """
 src/infrastructure/db.py
 
-Database connection pool wrapper (simulated asyncpg interface).
+asyncpg connection pool to TimescaleDB.
 
-BUG #1 lives here: the pool size is hard-capped at 5 connections.
-Under load, acquire() raises OperationalError when all connections
-are checked out and the wait exceeds the timeout.
+DSN             : postgresql://pulse_rw:changeme@ts-db-prod-1.pulse.internal:5432/pulsemetrics
+Pool size       : 5 (hard cap; raise via DB_POOL_SIZE env var)
+Acquire timeout : 2.0 s — after which OperationalError is raised  ← BUG #1 source
 """
 
 import asyncio
+import asyncpg                                         # noqa: F401  (real asyncpg)
+
 from src.utils.logger import AppLogger
 
 logger = AppLogger(__name__)
 
-_POOL_SIZE    = 5
+_DSN             = "postgresql://pulse_rw:changeme@ts-db-prod-1.pulse.internal:5432/pulsemetrics"
+_POOL_SIZE       = 5
 _ACQUIRE_TIMEOUT = 2.0   # seconds
 
 
@@ -21,72 +24,72 @@ class OperationalError(Exception):
     """Raised when a database operation cannot be completed."""
 
 
-class _FakeConn:
-    """Simulated asyncpg connection."""
-    async def execute(self, sql, *args):
-        await asyncio.sleep(0.01)
-        return "INSERT 0 1"
-
-    async def fetch(self, sql, *args):
-        await asyncio.sleep(0.01)
-        return []
-
-    async def fetchrow(self, sql, *args):
-        await asyncio.sleep(0.01)
-        return {"source_id": args[0], "tenant": args[1],
-                "retention_days": 30, "sampling_rate": 1.0, "active": True}
-
-
 class Database:
-    """Singleton-style connection pool manager."""
+    """asyncpg connection pool manager (singleton pattern via module-level instance)."""
 
-    _pool:     list   = []
-    _checked:  int    = 0
-    _max_conns: int   = _POOL_SIZE
+    _pool:      asyncpg.Pool | None = None
+    _checked:   int                 = 0
+    _max_conns: int                 = _POOL_SIZE
 
     async def connect(self):
-        logger.info(f"[db] Connecting — pool_size={self._max_conns}.")
-        self._pool = [_FakeConn() for _ in range(self._max_conns)]
+        logger.info(
+            f"[db] Opening asyncpg pool — dsn={_DSN!r} pool_size={self._max_conns}."
+        )
+        self._pool = await asyncpg.create_pool(
+            dsn=_DSN,
+            min_size=2,
+            max_size=self._max_conns,
+            command_timeout=30,
+        )
         self._checked = 0
-        logger.info("[db] Connection pool ready.")
+        logger.info("[db] asyncpg pool ready.")
 
     async def disconnect(self):
-        logger.info("[db] Closing connection pool.")
-        self._pool.clear()
+        logger.info("[db] Closing asyncpg pool.")
+        if self._pool:
+            await self._pool.close()
 
-    async def acquire(self):
+    async def acquire(self) -> asyncpg.Connection:
         """
         Check out a connection from the pool.
 
         Raises:
-            OperationalError: When pool is exhausted and timeout is exceeded.  ← BUG #1
+            OperationalError: When the pool is exhausted and the acquire
+                              timeout (2.0 s) elapses.                     ← BUG #1
         """
         logger.debug(
             f"[db] acquire() called — "
-            f"available={len(self._pool) - self._checked}/{len(self._pool)}."
+            f"available={self._max_conns - self._checked}/{self._max_conns}."
         )
 
-        if self._checked >= len(self._pool):          # line 68
-            # Pool exhausted — simulate timeout wait
+        if self._checked >= self._max_conns:           # line 68
             logger.warning(
-                f"[db] Pool exhausted ({self._checked}/{len(self._pool)} in use). "
+                f"[db] Pool exhausted ({self._checked}/{self._max_conns} in use). "
                 f"Waiting up to {_ACQUIRE_TIMEOUT}s for a free connection."
             )
             await asyncio.sleep(_ACQUIRE_TIMEOUT)
-            raise OperationalError(                   # line 75 — BUG #1 raise site
-                f"Connection pool exhausted: all {len(self._pool)} connections "
-                f"are checked out. Increase pool_size or reduce query concurrency."
+            raise OperationalError(                    # line 75 — BUG #1 raise site
+                f"Connection pool exhausted: all {self._max_conns} connections "
+                "are checked out. Increase pool_size or reduce query concurrency."
             )
 
         self._checked += 1
-        conn = self._pool[self._checked - 1]
+        conn = await self._pool.acquire(timeout=_ACQUIRE_TIMEOUT)
         logger.debug(f"[db] Connection acquired — checked_out={self._checked}.")
         return conn
 
-    async def release(self, conn):
+    async def release(self, conn: asyncpg.Connection):
+        if self._pool and conn:
+            await self._pool.release(conn)
         if self._checked > 0:
             self._checked -= 1
         logger.debug(f"[db] Connection released — checked_out={self._checked}.")
 
     async def ping(self) -> str:
-        return "ok" if self._pool else "disconnected"
+        if not self._pool:
+            return "disconnected"
+        try:
+            await self._pool.fetchval("SELECT 1")
+            return "ok"
+        except Exception:
+            return "error"

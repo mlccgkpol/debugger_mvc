@@ -1,7 +1,7 @@
 """
 src/repositories/source_repo.py
 
-Data-access layer for source/sensor configuration records stored in PostgreSQL.
+Data-access layer for source configuration records stored in PostgreSQL.
 """
 
 from typing import Any, Optional
@@ -10,20 +10,13 @@ from src.infrastructure.db import Database
 from src.utils.logger import AppLogger
 
 logger = AppLogger(__name__)
-_db    = Database()
+_db = Database()
 
 
 class SourceRepository:
-    """Reads source configuration from the relational PostgreSQL store."""
-
     async def get(self, source_id: str, tenant: str) -> Optional[dict[str, Any]]:
-        """
-        Fetch the configuration record for a source/sensor.
-
-        Returns None if the source does not exist in the sources table.
-        """
         logger.debug(
-            f"[source_repo] Fetching config — source_id={source_id} tenant={tenant}."
+            f"[source_repo] Fetching config - source_id={source_id} tenant={tenant}."
         )
         conn = await _db.acquire()
         try:
@@ -34,8 +27,7 @@ class SourceRepository:
             row = await conn.fetchrow(sql, source_id, tenant)
             if row is None:
                 logger.warning(
-                    f"[source_repo] Source not found — "
-                    f"source_id={source_id} tenant={tenant}."
+                    f"[source_repo] Source not found - source_id={source_id} tenant={tenant}."
                 )
                 return None
             return dict(row)

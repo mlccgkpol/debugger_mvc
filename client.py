@@ -28,12 +28,12 @@ SEQUENCE:
 
 REPORT FORMAT:
 ## FINAL DIAGNOSIS REPORT
-- FILE: <path>
-- LINE: <N>
-- ERROR: <exception_type>
-- CAUSE: <one_sentence_reason>
-- FIX: <one_line_code_change>
-- LOG_EVIDENCE: <exact_log_line>
+- **ERROR**: <exception_type>
+- **ROOT CAUSE**: <Short technical explanation>
+- **TRACE**: [Entry: <ID>] -> [Infra: <File:Line>] -> [Crash: <Error>]
+- **CODE**:
+  ```python
+  <Only the 3-5 lines where the error is raised>
 """
 
 def build_system_prompt(available_tools: list[str]) -> str:
@@ -72,7 +72,7 @@ class DebugPromptBuilder:
         """Aggressive correction for 'talkative' models."""
         messages = {
             1: "STOP TALKING. CALL A TOOL OR WRITE THE REPORT.",
-            2: "INVALID OUTPUT. YOU MUST USE A TOOL. Call search_logs_content(query='500') if stuck.",
+            2: 'INVALID OUTPUT. YOU MUST USE A TOOL. Call search_log(query="<ID>") if stuck.',
             3: "FINAL WARNING: Call a tool now or I will terminate the session.",
         }
         return messages.get(stall_count, messages[3])
@@ -114,6 +114,7 @@ import httpx
 import sys
 from datetime import datetime
 from typing import Dict, List, Any
+import traceback
 
 from mcp.client.session import ClientSession
 from mcp.client.sse import sse_client
@@ -165,7 +166,8 @@ class OllamaMCPClient:
                         await self.chat_with_tools(query)
 
         except Exception as e:
-            self._log("ERROR", f"Connection failed: {str(e)}")
+            self._log("ERROR", f"Connection failed: {str(e)}") 
+            traceback.print_exc()
 
     async def chat_with_tools(self, user_message: str):
         """Orchestrates the multi-turn debugging logic with raw history retention."""
@@ -199,6 +201,7 @@ class OllamaMCPClient:
 
             # B. Handle Stalls
             if not tool_calls:
+                self._log("AI TALKING", content)
                 stall_count += 1
                 if stall_count >= self.MAX_STALLS:
                     self._log("ABORT", "Model stalled too many times.")
@@ -312,6 +315,6 @@ if __name__ == "__main__":
     # Ensure MCP servers are running on these ports
     client = OllamaMCPClient(model="gemma4:e4b")
     asyncio.run(client.run(
-        repo_url="http://localhost:8000/sse",
+        repo_url="http://localhost:8002/sse",
         log_url="http://localhost:8001/sse"
     ))

@@ -1,0 +1,85 @@
+2026-04-14_06:00:01 | INFO    | main.py               | L27  | PulseMetrics starting up - initialising infrastructure.
+2026-04-14_06:00:01 | INFO    | db.py                 | L39  | [db] Opening asyncpg pool - dsn='postgresql://pulse_rw@ts-db-primary.pulsemetrics.svc.cluster.local:5432/pulsemetrics' pool_size=5.
+2026-04-14_06:00:02 | INFO    | db.py                 | L47  | [db] asyncpg pool ready.
+2026-04-14_06:00:02 | INFO    | cache.py              | L35  | [cache] Connecting to Redis - redis-primary.pulsemetrics.svc.cluster.local:6379/0.
+2026-04-14_06:00:02 | INFO    | cache.py              | L45  | [cache] Redis connection established.
+2026-04-14_06:00:02 | INFO    | telemetry.py          | L37  | [telemetry] Initialising relay client - endpoint=https://telemetry-gateway.pulsemetrics.internal/v1/streams/pulse-prod.
+2026-04-14_06:00:02 | INFO    | telemetry.py          | L47  | [telemetry] Relay client ready.
+2026-04-14_06:00:02 | INFO    | main.py               | L31  | Infrastructure ready. Accepting requests.
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-14_08:14:05 | DEBUG   | main.py               | L55  | [a1b2c3d4] Incoming POST /api/v2/ingest/event from 10.0.1.44
+2026-04-14_08:14:05 | INFO    | ingest.py             | L34  | [n/a] Ingest request for metric='cpu_usage' source='host-prod-01'.
+2026-04-14_08:14:05 | DEBUG   | auth_service.py       | L46  | Validating token (length=172).
+2026-04-14_08:14:05 | DEBUG   | auth_service.py       | L85  | Token valid - tenant=acme sub=pipeline-agent.
+2026-04-14_08:14:05 | INFO    | ingest.py             | L40  | [n/a] Auth OK - tenant='acme'.
+2026-04-14_08:14:05 | DEBUG   | ingest_service.py     | L25  | [ingest] Entering pipeline - event_id=f3a8b21c9d01 tenant=acme metric=cpu_usage.
+2026-04-14_08:14:05 | DEBUG   | ingest_service.py     | L31  | [ingest] Schema validation passed - event_id=f3a8b21c9d01.
+2026-04-14_08:14:05 | DEBUG   | ingest_service.py     | L33  | [ingest] Resolving source_id=host-prod-01.
+2026-04-14_08:14:05 | DEBUG   | source_repo.py        | L19  | [source_repo] Fetching config - source_id=host-prod-01 tenant=acme.
+2026-04-14_08:14:05 | DEBUG   | db.py                 | L58  | [db] acquire() called - checked_out=0/5.
+2026-04-14_08:14:05 | DEBUG   | db.py                 | L73  | [db] Connection acquired - checked_out=1.
+2026-04-14_08:14:05 | DEBUG   | db.py                 | L80  | [db] Connection released - checked_out=0.
+2026-04-14_08:14:05 | DEBUG   | ingest_service.py     | L38  | [ingest] Source resolved - retention=30d.
+2026-04-14_08:14:05 | INFO    | ingest_service.py     | L42  | [ingest] Writing metric to TimescaleDB - event_id=f3a8b21c9d01 source=host-prod-01.
+2026-04-14_08:14:05 | DEBUG   | metric_repo.py        | L22  | [metric_repo] Acquiring DB connection - table=metrics_acme metric=cpu_usage.
+2026-04-14_08:14:05 | DEBUG   | db.py                 | L58  | [db] acquire() called - checked_out=0/5.
+2026-04-14_08:14:05 | DEBUG   | db.py                 | L73  | [db] Connection acquired - checked_out=1.
+2026-04-14_08:14:05 | DEBUG   | metric_repo.py        | L34  | [metric_repo] Connection acquired from pool.
+2026-04-14_08:14:05 | DEBUG   | metric_repo.py        | L42  | [metric_repo] Executing INSERT - metric=cpu_usage.
+2026-04-14_08:14:05 | DEBUG   | metric_repo.py        | L53  | [metric_repo] INSERT complete - rows=1.
+2026-04-14_08:14:05 | DEBUG   | db.py                 | L80  | [db] Connection released - checked_out=0.
+2026-04-14_08:14:05 | DEBUG   | metric_repo.py        | L57  | [metric_repo] Connection returned to pool.
+2026-04-14_08:14:05 | INFO    | ingest_service.py     | L50  | [ingest] DB write OK - event_id=f3a8b21c9d01 rows=1.
+2026-04-14_08:14:05 | DEBUG   | ingest_service.py     | L53  | [ingest] Relay emit acknowledged - event_id=f3a8b21c9d01.
+2026-04-14_08:14:05 | DEBUG   | ingest_service.py     | L57  | [ingest] Cache key invalidated - key=summary:acme:host-prod-01:cpu_usage.
+2026-04-14_08:14:05 | INFO    | ingest.py             | L48  | [n/a] Event accepted - event_id='f3a8b21c9d01'.
+2026-04-14_08:14:05 | INFO    | main.py               | L67  | [a1b2c3d4] POST /api/v2/ingest/event -> HTTP 200 in 11.2ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-14_09:30:00 | DEBUG   | main.py               | L55  | [e5f6a7b8] Incoming POST /api/v2/ingest/event from 10.0.2.11
+2026-04-14_09:30:00 | INFO    | ingest.py             | L34  | [n/a] Ingest request for metric='memory_rss' source='host-prod-02'.
+2026-04-14_09:30:00 | DEBUG   | auth_service.py       | L46  | Validating token (length=0).
+2026-04-14_09:30:00 | WARNING | auth_service.py       | L50  | Rejecting token - expected 3 JWT segments, got 1.
+2026-04-14_09:30:00 | WARNING | ingest.py             | L42  | [n/a] Auth rejected for source='host-prod-02': Malformed token: expected 3 parts, got 1. Ensure the Authorization header is 'Bearer <token>'.
+2026-04-14_09:30:00 | ERROR   | main.py               | L67  | [e5f6a7b8] POST /api/v2/ingest/event -> HTTP 401 in 3.1ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-14_10:45:12 | DEBUG   | main.py               | L55  | [c9d0e1f2] Incoming GET /api/v2/query/summary/boiler-room-a17 from 10.0.3.55
+2026-04-14_10:45:12 | INFO    | query.py              | L29  | Summary query - source='boiler-room-a17' metric='temperature_c' window=3600s.
+2026-04-14_10:45:12 | DEBUG   | query_service.py      | L28  | [query] Summary requested - source=boiler-room-a17 metric=temperature_c window=3600s tenant=default.
+2026-04-14_10:45:12 | DEBUG   | query_service.py      | L33  | [query] Checking Redis - key=summary:default:boiler-room-a17:temperature_c:3600.
+2026-04-14_10:45:12 | DEBUG   | cache.py              | L52  | [cache] GET summary:default:boiler-room-a17:temperature_c:3600.
+2026-04-14_10:45:12 | DEBUG   | cache.py              | L60  | [cache] GET summary:default:boiler-room-a17:temperature_c:3600 -> MISS.
+2026-04-14_10:45:12 | INFO    | query_service.py      | L42  | [query] Cache miss - falling back to TimescaleDB source=boiler-room-a17 metric=temperature_c.
+2026-04-14_10:45:12 | DEBUG   | query_service.py      | L47  | [query] Querying metric_repo - source=boiler-room-a17 window=3600s.
+2026-04-14_10:45:12 | DEBUG   | metric_repo.py        | L69  | [metric_repo] read_window - source=boiler-room-a17 metric=temperature_c window=3600s table=metrics_default.
+2026-04-14_10:45:12 | DEBUG   | db.py                 | L58  | [db] acquire() called - checked_out=0/5.
+2026-04-14_10:45:12 | DEBUG   | db.py                 | L73  | [db] Connection acquired - checked_out=1.
+2026-04-14_10:45:12 | WARNING | metric_repo.py        | L83  | [metric_repo] Statement timeout reading source=boiler-room-a17 metric=temperature_c window=3600s.
+2026-04-14_10:45:12 | DEBUG   | db.py                 | L80  | [db] Connection released - checked_out=0.
+2026-04-14_10:45:12 | DEBUG   | query_service.py      | L51  | [query] DB returned None rows.
+2026-04-14_10:45:12 | DEBUG   | query_service.py      | L55  | [query] Beginning aggregation - source=boiler-room-a17.
+2026-04-14_10:45:12 | ERROR   | query_service.py      | L59  | [query] Aggregation failed - source=boiler-room-a17: 'NoneType' object has no attribute '__iter__'
+2026-04-14_10:45:12 | ERROR   | query.py              | L44  | Aggregation error - source='boiler-room-a17': 'NoneType' object has no attribute '__iter__'
+2026-04-14_10:45:12 | ERROR   | main.py               | L67  | [c9d0e1f2] GET /api/v2/query/summary/boiler-room-a17 -> HTTP 500 in 28.4ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+2026-04-14_11:00:00 | DEBUG   | main.py               | L55  | [g3h4i5j6] Incoming POST /api/v2/ingest/event from 10.0.1.44
+2026-04-14_11:00:00 | INFO    | ingest.py             | L34  | [n/a] Ingest request for metric='disk_io' source='host-prod-01'.
+2026-04-14_11:00:00 | DEBUG   | auth_service.py       | L46  | Validating token (length=172).
+2026-04-14_11:00:00 | DEBUG   | auth_service.py       | L85  | Token valid - tenant=acme sub=pipeline-agent.
+2026-04-14_11:00:00 | INFO    | ingest.py             | L40  | [n/a] Auth OK - tenant='acme'.
+2026-04-14_11:00:00 | DEBUG   | ingest_service.py     | L25  | [ingest] Entering pipeline - event_id=7c3d912f4e55 tenant=acme metric=disk_io.
+2026-04-14_11:00:00 | DEBUG   | ingest_service.py     | L31  | [ingest] Schema validation passed - event_id=7c3d912f4e55.
+2026-04-14_11:00:00 | DEBUG   | ingest_service.py     | L33  | [ingest] Resolving source_id=host-prod-01.
+2026-04-14_11:00:00 | DEBUG   | source_repo.py        | L19  | [source_repo] Fetching config - source_id=host-prod-01 tenant=acme.
+2026-04-14_11:00:00 | DEBUG   | db.py                 | L58  | [db] acquire() called - checked_out=0/5.
+2026-04-14_11:00:00 | DEBUG   | db.py                 | L73  | [db] Connection acquired - checked_out=1.
+2026-04-14_11:00:00 | DEBUG   | db.py                 | L80  | [db] Connection released - checked_out=0.
+2026-04-14_11:00:00 | DEBUG   | ingest_service.py     | L38  | [ingest] Source resolved - retention=30d.
+2026-04-14_11:00:00 | INFO    | ingest_service.py     | L42  | [ingest] Writing metric to TimescaleDB - event_id=7c3d912f4e55 source=host-prod-01.
+2026-04-14_11:00:00 | DEBUG   | metric_repo.py        | L22  | [metric_repo] Acquiring DB connection - table=metrics_acme metric=disk_io.
+2026-04-14_11:00:00 | DEBUG   | db.py                 | L58  | [db] acquire() called - checked_out=5/5.
+2026-04-14_11:00:02 | WARNING | db.py                 | L65  | [db] Pool acquire timed out after 2.0s (checked_out=5/5).
+2026-04-14_11:00:02 | ERROR   | metric_repo.py        | L29  | [metric_repo] Failed to acquire DB connection - table=metrics_acme: Timed out after 2.0s waiting for a database connection from a pool of 5.
+2026-04-14_11:00:02 | ERROR   | ingest_service.py     | L47  | [ingest] DB write failed for event_id=7c3d912f4e55: Timed out after 2.0s waiting for a database connection from a pool of 5.
+2026-04-14_11:00:02 | ERROR   | ingest.py             | L51  | [n/a] Ingest pipeline failed for metric='disk_io': Timed out after 2.0s waiting for a database connection from a pool of 5.
+2026-04-14_11:00:02 | ERROR   | main.py               | L67  | [g3h4i5j6] POST /api/v2/ingest/event -> HTTP 500 in 2041.3ms
+--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
