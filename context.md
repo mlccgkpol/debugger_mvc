@@ -1,6 +1,6 @@
 # Project Context
 
-This file is meant to be a durable memory aid for future work in `debugger_mvc`.
+This file is meant to be a durable memory aid for future work in `log_debugger`.
 
 ## What This Repository Actually Is
 
@@ -36,7 +36,7 @@ There are three moving pieces:
    - summarizes only the middle history
    - preserves the last 3 raw iterations for the main model
 
-The target code being debugged is usually not the `debugger_mvc` repo itself. It is typically one of the generated projects in `test_projects/`.
+The target code being debugged is usually not the `log analyser` repo itself. It is typically one of the generated projects in `test_projects/`.
 
 ## Most Important Practical Detail
 

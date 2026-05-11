@@ -1,6 +1,6 @@
-# debugger_mvc
+# log_debugger
 
-`debugger_mvc` is a small MCP-based debugging harness for log-driven bug diagnosis with a local Ollama model.
+`log_debugger` is a small MCP-based debugging harness for log-driven bug diagnosis with a local Ollama model.
 
 The repository has two main parts:
 
